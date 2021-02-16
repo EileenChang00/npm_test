@@ -132,7 +132,7 @@ export default function Come_create(){
     const ChangeKnow = (event) =>{
         setKnow(event.target.value);
     };
-    const [newProductId, setProductId] = useState('');
+    const [newProductId, setProductId] = useState([]);
     console.log(newProductId);
     const [newTime, setTime] = useState('');
     const ChangeTime = (event) =>{
@@ -153,7 +153,7 @@ export default function Come_create(){
             "com_know": newKnow,
             "com_time": newTime,
             "com_remark": newRemark,
-            "com_product_id": [newProductId]
+            "com_product_id": newProductId
             }
         },
         ], function(err, records) {
@@ -261,11 +261,13 @@ export default function Come_create(){
                     <TextField margin="dense" label="得知管道" type="text" value={newKnow} onChange={ChangeKnow} fullWidth />
                     <Autocomplete
                         freeSolo
+                        multiple
                         onChange={(event,newValue)=>{
                             if(!newValue){
                                 console.log("!newValue");
                             }
-                            setProductId(newValue.recordId);
+                            console.log(newValue);
+                            setProductId(newValue.map((product)=>product.recordId));
                         }}
                         options={SelectProduct}
                         getOptionLabel={(option) => option.name}
