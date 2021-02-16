@@ -7,6 +7,10 @@ export default function Come_create(){
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
+    //import moment
+    var moment = require('moment');
+    const currentDate = moment().format('YYYY-MM-DD');
+    console.log(currentDate);
     //control Update-Dialog open
     const [open,setOpen] = useState(false);
     const handleOpen = () =>{
@@ -116,7 +120,7 @@ export default function Come_create(){
 
     //get & prepare update data
     const [newCustomerId, setCustomerId] = useState('');
-    const [newComeDate, setComeDate] = useState('');
+    const [newComeDate, setComeDate] = useState(currentDate);
     const ChangeComeDate = (event) =>{
         setComeDate(event.target.value);
     };
@@ -129,9 +133,6 @@ export default function Come_create(){
         setKnow(event.target.value);
     };
     const [newProductId, setProductId] = useState('');
-    const ChangeProductId = (event) =>{
-        setProductId(event.target.value);
-    }
     console.log(newProductId);
     const [newTime, setTime] = useState('');
     const ChangeTime = (event) =>{
@@ -158,11 +159,12 @@ export default function Come_create(){
         ], function(err, records) {
         if (err) {
             console.error(err);
+            alert(err);
             return;
         }
+        alert("完成新增");
         });
         handleClose();
-        alert("完成新增");
     }
     return(
         <div>
@@ -250,23 +252,25 @@ export default function Come_create(){
                     </Dialog>
                     <InputLabel>來訪日期</InputLabel>
                     <TextField margin="dense" type="date" value={newComeDate} onChange={ChangeComeDate} fullWidth />
-                    <InputLabel>員工名稱</InputLabel>
-                    <Select label="員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
+                    <InputLabel>負責員工名稱</InputLabel>
+                    <Select label="負責員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
                         {SelectEmployee.map((nameList) =>(
                             <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
                     </Select>
                     <TextField margin="dense" label="得知管道" type="text" value={newKnow} onChange={ChangeKnow} fullWidth />
-                    {/* 產品選單 */}
                     <Autocomplete
                         freeSolo
                         onChange={(event,newValue)=>{
+                            if(!newValue){
+                                console.log("!newValue");
+                            }
                             setProductId(newValue.recordId);
                         }}
                         options={SelectProduct}
                         getOptionLabel={(option) => option.name}
                         renderInput={(params) => (
-                        <TextField {...params} label="產品名稱" margin="normal" />
+                        <TextField {...params} label="有興趣的產品" margin="normal" />
                         )}
                     />
                     <TextField margin="dense" label="停留時長" type="text" value={newTime} onChange={ChangeTime} fullWidth />

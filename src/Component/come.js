@@ -26,6 +26,7 @@ export default function Come(){
 
     //將被勾選的資料id存進array
     const [SelectedId_arr, setUpdateId] = useState([]);
+    const [SelectedCome, setSelectedCome] = useState([]);
     const handleSelect = (event) =>{
         //從勾選id得知哪筆資料要進行修改//勾選id=com_id
         var new_select_id = event.target.getAttribute("id");
@@ -35,6 +36,7 @@ export default function Come(){
             filterByFormula: "{com_id}='"+new_select_id+"'"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
+                setSelectedCome(record);
                 new_arr.includes(record.id) ? new_arr=new_arr.filter(item=>item !== record.id) : new_arr=[...new_arr,record.id];//若紀錄已被勾選刪除紀錄，否則紀錄勾選id
                 setUpdateId(new_arr);
             });
@@ -51,7 +53,7 @@ export default function Come(){
             </div>
             <div align="right" width="25px">
                 <Come_create />
-                {SelectedId_arr.length===1 && <Come_update update_id={SelectedId_arr[0]}/>}
+                {SelectedId_arr.length===1 && <Come_update update_id={SelectedId_arr[0]} come={SelectedCome}/>}
                 {SelectedId_arr.length>0 && <Come_delete delete_id={SelectedId_arr}/>}
             </div>
             <div className="container">

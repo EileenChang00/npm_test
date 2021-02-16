@@ -106,9 +106,6 @@ export default function Customer_create(){
             console.error(err);
             return;
         }
-        records.forEach(function (record) {
-            console.log(record.getId());
-        });
         });
         handleClose();
         alert("完成新增");
