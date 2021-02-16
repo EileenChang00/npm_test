@@ -104,11 +104,12 @@ export default function Customer_create(){
         ], function(err, records) {
         if (err) {
             console.error(err);
+            alert(err);
             return;
         }
+        alert("完成新增");
         });
         handleClose();
-        alert("完成新增");
     }
     return(
         <div>

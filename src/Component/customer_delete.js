@@ -19,13 +19,12 @@ export default function Customer_delete(props){
             }], function(err, records) {
             if (err) {
                 console.error(err);
+                alert(err);
                 return;
-            }records.forEach(function(record) {
-                //console.log(record.get('cus_id'));
-            });
+            }
+            alert("完成刪除");
             })
         ))
-        alert("完成刪除");
     }
 
     return(

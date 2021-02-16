@@ -95,13 +95,12 @@ export default function Customer_update(props){
         }], function(err, records) {
         if (err) {
             console.error(err);
+            alert(err);
             return;
-        }records.forEach(function(record) {
-            console.log(record.get('com_id'));
-        });
+        }
+        alert("完成修改");
         });
         handleClose();
-        alert("完成修改");
     }
 
     return(

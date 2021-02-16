@@ -11,6 +11,7 @@ export default function Come_delete(props){
         function(err, deletedRecords) {
         if (err) {
             console.error(err);
+            alert(err);
             return;
         }
         alert('完成刪除');
