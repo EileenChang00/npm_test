@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuItem, TextField, DialogActions } from "@material-ui/core";
 import { useState, useEffect } from 'react';
+import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
 
 export default function Come_create(){
@@ -15,14 +16,14 @@ export default function Come_create(){
         setOpen(false);
     }
     //multiple choices 
-    //SelectCustomer[] = [customerPhone,customerName] //customerPhone=key
+    //顧客名稱選單
     const [SelectCustomer, setSelectCustomer] = useState([]);
     useEffect(()=>{
         base('customer').select({
         view: "Grid view"
     }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
-            SelectCustomer.push([record.fields.cus_phone,record.fields.cus_name]);
+            SelectCustomer.push([record.fields.cus_name,record.fields.cus_phone,record.id]);
             setSelectCustomer(SelectCustomer);
         });
         fetchNextPage();
@@ -31,6 +32,41 @@ export default function Come_create(){
         if (err) { console.error(err); return; }
     });
     },[])
+    const filter = createFilterOptions();//選單內搜尋
+    const [open_Customer, openCustomerDialog] = useState(false);//打開新增顧客視窗
+    const [value_cus, setValue_cus] = useState('');
+    const [dialogValue_cus, setDialogValue_cus] = useState({
+        name: '',
+        phone: '',
+    });
+    const closeCustomerDialog = () => {
+        setDialogValue_cus({
+        name: '',
+        phone: '',
+        });
+        openCustomerDialog(false);
+    };
+    //新增新顧客姓名電話
+    const handleSubmitCustomer = (event) =>{
+        event.preventDefault();
+        base('customer').create([{
+        "fields": {
+            "cus_name": dialogValue_cus.name,
+            "cus_phone": dialogValue_cus.phone
+        }
+    }
+    ], function(err, records) {
+    if (err) {
+        return;
+    }
+    records.forEach(function (record) {
+        setCustomerId(record.getId());
+    });
+    });
+    setValue_cus(dialogValue_cus.name);
+    closeCustomerDialog();
+    }
+
     //員工名稱選單
     const [SelectEmployee, setSelectEmployee] = useState([]);
     useEffect(()=>{
@@ -38,7 +74,9 @@ export default function Come_create(){
             view: "Grid view"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
-                SelectEmployee.push([record.id,record.fields.em_name]);
+                SelectEmployee.push({
+                    recordId:record.id,
+                    name:record.fields.em_name});
                 setSelectEmployee(SelectEmployee);
             });
             fetchNextPage();
@@ -53,7 +91,9 @@ export default function Come_create(){
             view: "Grid view"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
-                SelectProduct.push([record.id,record.fields.product_name]);
+                SelectProduct.push({
+                    recordId:record.id,
+                    name:record.fields.product_name});
                 setSelectProduct(SelectProduct);
             });
             fetchNextPage();
@@ -61,6 +101,7 @@ export default function Come_create(){
             if (err) { console.error(err); return; }
         });
     },[])
+    console.log(SelectProduct);
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -75,21 +116,6 @@ export default function Come_create(){
 
     //get & prepare update data
     const [newCustomerId, setCustomerId] = useState('');
-    const [newCustomerPhone, setCustomerPhone] =useState('');
-    const ChangeCustomerId = (event) =>{
-        setCustomerPhone(event.target.value);
-        base('customer').select({
-        view: "Grid view",
-        filterByFormula: "{cus_phone}='"+event.target.value+"'"
-    }).eachPage(function page(records, fetchNextPage) {
-        records.forEach(function(record) {
-            setCustomerId(record.id);
-        });
-        fetchNextPage();
-    }, function done(err) {
-        if (err) { console.error(err); return; }
-    });
-    }
     const [newComeDate, setComeDate] = useState('');
     const ChangeComeDate = (event) =>{
         setComeDate(event.target.value);
@@ -106,6 +132,7 @@ export default function Come_create(){
     const ChangeProductId = (event) =>{
         setProductId(event.target.value);
     }
+    console.log(newProductId);
     const [newTime, setTime] = useState('');
     const ChangeTime = (event) =>{
         setTime(event.target.value);
@@ -121,13 +148,11 @@ export default function Come_create(){
             "fields": {
             "com_cus_id": [newCustomerId],
             "com_date": newComeDate,
-            "com_em_id": ["recpO8hcpqUSY7NbP"],
+            "com_em_id": [newEmployeeId],
             "com_know": newKnow,
             "com_time": newTime,
             "com_remark": newRemark,
-            "com_product_id": [
-                "reclqOUslPXx19J6V"
-            ]
+            "com_product_id": [newProductId]
             }
         },
         ], function(err, records) {
@@ -135,9 +160,6 @@ export default function Come_create(){
             console.error(err);
             return;
         }
-        records.forEach(function (record) {
-            console.log(record.getId());
-        });
         });
         handleClose();
         alert("完成新增");
@@ -148,27 +170,105 @@ export default function Come_create(){
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>新增資料</DialogTitle>
                 <DialogContent>
-                    <InputLabel>顧客名稱</InputLabel>
-                    <Select label="顧客名稱" fullWidth value={newCustomerPhone} onChange={ChangeCustomerId} MenuProps={MenuProps} >
-                        {SelectCustomer.map((nameList) =>(
-                            <MenuItem key={nameList[0]} value={nameList[0]}>{nameList[1]},{nameList[0]}</MenuItem>
-                        ))}
-                    </Select>
+                    <Autocomplete 
+                    value={value_cus}
+                    onChange={(event, newValue) => {
+                        console.log(newValue);
+                        if(!newValue){
+                            console.log('newValue');
+                        }else if (newValue && newValue[0].search(newValue[1]) !== -1) {
+                            // timeout to avoid instant validation of the dialog's form.
+                            setTimeout(() => {
+                            openCustomerDialog(true);
+                            setDialogValue_cus({
+                                name: newValue[1],
+                                phone:''
+                            });
+                            });
+                        }else {
+                            setValue_cus(newValue[0]);
+                            setCustomerId(newValue[2]);
+                        }
+                        }}
+                    filterOptions={(options, params) => {
+                        const filtered = filter(options, params);
+                        if (params.inputValue !== '') {
+                            filtered.push([
+                            `新增顧客 "${params.inputValue}"`,
+                            params.inputValue,
+                            ]);
+                        }
+                        return filtered;
+                        }}
+                    options={SelectCustomer}
+                    getOptionLabel={(option) => {
+                        // e.g value selected with enter, right from the input
+                        if (typeof option === 'string') {
+                            return option;
+                        }
+                        return option[0];
+                        }}// 在選單中按了選擇的名稱後，回傳顯示在TextField裡的值
+                    selectOnFocus
+                    clearOnBlur
+                    renderOption={(option) => option[0]+","+option[1]}//在選單中顯示的內容(此為顧客名稱List)
+                    freeSolo//可以任意輸入非選單內的文字
+                    renderInput={(params) => (
+                        <TextField {...params} label="顧客名稱" />
+                    )}
+                    />
+                    <Dialog open={open_Customer} onClose={closeCustomerDialog} aria-labelledby="form-dialog-title">
+                        <form onSubmit={handleSubmitCustomer}>
+                        <DialogTitle id="form-dialog-title">請輸入新顧客的姓名和聯絡方式!</DialogTitle>
+                        <DialogContent>
+                            <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            value={dialogValue_cus.name}
+                            onChange={(event) => setDialogValue_cus({ ...dialogValue_cus, name: event.target.value })}
+                            label="顧客名稱"
+                            type="text"
+                            />
+                            <TextField
+                            margin="dense"
+                            id="phone"
+                            value={dialogValue_cus.phone}
+                            onChange={(event) => setDialogValue_cus({ ...dialogValue_cus, phone: event.target.value })}
+                            label="手機"
+                            type="number"
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={closeCustomerDialog} color="primary">
+                            取消
+                            </Button>
+                            <Button type="submit" color="primary">
+                            新增
+                            </Button>
+                        </DialogActions>
+                        </form>
+                    </Dialog>
                     <InputLabel>來訪日期</InputLabel>
                     <TextField margin="dense" type="date" value={newComeDate} onChange={ChangeComeDate} fullWidth />
-                    <InputLabel>負責員工名稱</InputLabel>
-                    <Select label="負責員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
+                    <InputLabel>員工名稱</InputLabel>
+                    <Select label="員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
                         {SelectEmployee.map((nameList) =>(
-                            <MenuItem key={nameList[0]} value={nameList[0]}>{nameList[1]}</MenuItem>
+                            <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
                     </Select>
                     <TextField margin="dense" label="得知管道" type="text" value={newKnow} onChange={ChangeKnow} fullWidth />
-                    <InputLabel>有興趣的產品</InputLabel>
-                    <Select label="有興趣的產品" fullWidth value={newProductId} onChange={ChangeProductId} MenuProps={MenuProps}>
-                        {SelectProduct.map((nameList) =>(
-                            <MenuItem key={nameList[0]} value={nameList[0]}>{nameList[1]}</MenuItem>
-                        ))}
-                    </Select>
+                    {/* 產品選單 */}
+                    <Autocomplete
+                        freeSolo
+                        onChange={(event,newValue)=>{
+                            setProductId(newValue.recordId);
+                        }}
+                        options={SelectProduct}
+                        getOptionLabel={(option) => option.name}
+                        renderInput={(params) => (
+                        <TextField {...params} label="產品名稱" margin="normal" />
+                        )}
+                    />
                     <TextField margin="dense" label="停留時長" type="text" value={newTime} onChange={ChangeTime} fullWidth />
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />
                 </DialogContent>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import "./come.css";
 import Come_update from "./come_update"
-import Come_create from "./come_create2"
+import Come_create from "./come_create"
 import Come_delete from "./come_delete"
 
 export default function Come(){
