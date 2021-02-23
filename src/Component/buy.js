@@ -1,4 +1,4 @@
-import { Button, Table, TableCell, TableContainer, TableHead, TableRow, Checkbox, TableBody } from "@material-ui/core";
+import { Button, Table, TableCell, TableContainer, TableHead, TableRow, Checkbox, TableBody, Grid } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import "./come.css";
 import Buy_create from "./buy_create";
@@ -27,11 +27,15 @@ export default function Buy(){
             <div className="heads">
                 <h1>SCHRAMM</h1>
             </div>
-            <div align="right" width="25px">
-                <Buy_create />
-                <Button width="25px" variant="contained" color="default">修改</Button>
-                <Button width="25px" variant="contained" color="secondary">刪除</Button>
-            </div>
+            <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
+                <Grid item>
+                    <Button width="25px" variant="contained" color="default">修改</Button>
+                </Grid>
+                <Grid item>
+                    <Button width="25px" variant="contained" color="secondary">刪除</Button>
+                </Grid>
+                <Grid item><Buy_create /></Grid>
+            </Grid>
             <div className="container">
                 <TableContainer>
                     <Table tablename="buy">

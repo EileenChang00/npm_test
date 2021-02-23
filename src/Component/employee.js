@@ -1,4 +1,4 @@
-import { Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
+import { Grid, Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import "./come.css";
 import Employee_create from "./employee_create";
@@ -51,11 +51,12 @@ export default function Employee(){
             <div className="heads">
                 <h1>SCHRAMM</h1>
             </div>
-            <div align="right">
-                <Employee_create></Employee_create>
-                {SelectedId_arr.length===1 && <Employee_update update_id={SelectedId_arr[0]}  employee={SelectedEmployee}/>}
-                {SelectedId_arr.length>0 && <Employee_delete delete_id={SelectedId_arr} />}
-            </div>
+            
+            <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
+                <Grid item>{SelectedId_arr.length===1 && <Employee_update update_id={SelectedId_arr[0]}  employee={SelectedEmployee}/>}</Grid>
+                <Grid item>{SelectedId_arr.length>0 && <Employee_delete delete_id={SelectedId_arr} />}</Grid>
+                <Grid item><Employee_create /></Grid>
+            </Grid>
             <div className="container">
                 <TableContainer>
                     <Table tablename='employee'>

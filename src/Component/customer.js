@@ -1,4 +1,4 @@
-import { Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
+import { Grid, Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import "./come.css";
 import Customer_create from "./customer_create";
@@ -51,11 +51,15 @@ export default function Customer(){
             <div className="heads">
                 <h1>SCHRAMM</h1>
             </div>
-            <div align="right">
-                <Customer_create />
-                {SelectedId_arr.length===1 && <Customer_update update_id={SelectedId_arr[0]}  customer={SelectedCustomer} />}
-                {SelectedId_arr.length>0 && <Customer_delete delete_id={SelectedId_arr} />}
-            </div>
+            <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
+                <Grid item>
+                    {SelectedId_arr.length===1 && <Customer_update update_id={SelectedId_arr[0]}  customer={SelectedCustomer} />}
+                </Grid>
+                <Grid item>
+                    {SelectedId_arr.length>0 && <Customer_delete delete_id={SelectedId_arr} />}
+                </Grid>
+                <Gird item><Customer_create /></Gird>
+            </Grid>
             <div className="container">
                 <TableContainer>
                     <Table tablename='customer'>

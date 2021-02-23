@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Grid, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import "./come.css";
 import Come_update from "./come_update"
 import Come_create from "./come_create"
@@ -51,11 +51,15 @@ export default function Come(){
             <div className="heads">
                 <h1>SCHRAMM</h1>
             </div>
-            <div align="right" width="25px">
-                <Come_create />
-                {SelectedId_arr.length===1 && <Come_update update_id={SelectedId_arr[0]} come={SelectedCome}/>}
-                {SelectedId_arr.length>0 && <Come_delete delete_id={SelectedId_arr}/>}
-            </div>
+            <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
+                <Grid item>
+                    {SelectedId_arr.length===1 && <Come_update update_id={SelectedId_arr[0]} come={SelectedCome}/>}
+                </Grid>
+                <Grid item>
+                    {SelectedId_arr.length>0 && <Come_delete delete_id={SelectedId_arr}/>}
+                </Grid>
+                <Grid item><Come_create /></Grid>
+            </Grid>
             <div className="container">
                 <TableContainer>
                     <Table tablename='come' >

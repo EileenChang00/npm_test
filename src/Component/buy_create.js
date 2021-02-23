@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Button, Dialog, DialogContent, DialogTitle, DialogActions, TextField, InputLabel, Select, MenuItem } from "@material-ui/core";
+import { Button, Dialog, DialogContent, DialogTitle, DialogActions, TextField, InputLabel, Select, MenuItem, Grid, IconButton, Typography } from "@material-ui/core";
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import AddRoundedIcon from '@material-ui/icons/AddRounded';
+import DeleteRoundedIcon from '@material-ui/icons/DeleteRounded';
 
 export default function Buy_create(){
     //connect airtable
@@ -108,38 +110,44 @@ export default function Buy_create(){
             if (err) { console.error(err); return; }
         });
     },[])
-    console.log(SelectProduct);
     const [open_Sale, openSaleDialog] = useState(false);
+    const handleSaleDialog = () =>{
+        openSaleDialog(true);
+    }
     const closeSaleDialog = () =>{
-        setDialogValue_sale({
-            recordId:'',
-            name:'',
-            count:'',
-        });
+        setSaleName('');
+        setSaleCount('');
         openSaleDialog(false);
     }
-    const [value_sale, setValue_sale] = useState([{ //儲存最後要新增到sale裡的資料
-        recordId:'',
-        count:'',
-    }])
-    const [dialogValue_sale, setDialogValue_sale] = useState([{ //儲存放進dialog中的臨時資料
-        recordId:'',
-        name:'',
-        count:'',
-    }])
-    //新增購買的產品ID和數量 到sale資料表
-    const handleSubmitSale = (event) =>{
-        event.preventDefault();
-        var sale_temp = value_sale;
-        sale_temp.push([...sale_temp,
-            {recordId:dialogValue_sale.recordId,
-            name:dialogValue_sale.name,
-            count:dialogValue_sale.count,}]);
-        setValue_sale(sale_temp);
-        closeSaleDialog();
+    const [value_sale, setValue_sale] = useState([]);
+    const [saleName, setSaleName] = useState();
+    const [saleId, setSaleId] = useState();
+    const [saleCount, setSaleCount] = useState();
+    const ChangesaleCount = (event) =>{
+        setSaleCount(event.target.value);
     }
-    console.log("dialogvalue_sale= "+dialogValue_sale);
-    console.log("value_sale= "+value_sale);
+    //點擊Add Icon
+    const addSale = () =>{
+        value_sale.includes(saleName) ? value_sale.push([saleName,saleCount]) : value_sale.push([saleName,saleCount,saleId]);
+        setValue_sale(value_sale);
+        setSaleName('');
+        setSaleCount('');
+        setSaleId('');
+    }
+    //點擊Delete Icon
+    const deleteSale = (event) =>{
+        var delete_sale;
+        value_sale.forEach(function(sale){
+            console.log(event.currentTarget.getAttribute("getname"));
+            if(sale[0]===event.currentTarget.getAttribute("getname")){
+                delete_sale = sale;
+                console.log(delete_sale);
+            }
+        })
+        var sale_temp = value_sale.filter(item => item!==delete_sale);
+        setValue_sale(sale_temp);
+    }
+    console.log(value_sale);
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -181,8 +189,10 @@ export default function Buy_create(){
     const ChangeRemark = (event) =>{
         setRemark(event.target.value);
     }
+    const [sale_arr, setSaleArr] = useState([]);
     //when 新增button is clicked
-    function handleClick(){
+        //新增購買資料
+    function create_buy(){    
         base('buy').create([
         newShippingDate ? 
         {"fields": {
@@ -194,6 +204,7 @@ export default function Buy_create(){
             "buy_actualprice": newActualPrice,
             "buy_fixedprice":newFixedPrice,
             "buy_remark":newRemark,
+            "sale_id":sale_arr,
             }
         } : {"fields": {
             "buy_cus_id": [newCustomerId],
@@ -203,6 +214,7 @@ export default function Buy_create(){
             "buy_actualprice": newActualPrice,
             "buy_fixedprice":newFixedPrice,
             "buy_remark":newRemark,
+            "sale_id":sale_arr,
             }
         }
         ], function(err, records) {
@@ -218,13 +230,53 @@ export default function Buy_create(){
         });
         handleClose();
     }
+    function create_sale(){
+        return new Promise(resolve=>{
+            value_sale.forEach(function(sale_record){
+                base('sale').create([
+                    {"fields": {
+                        "product": [sale_record[2]],
+                        "sale_count": parseInt(sale_record[1],10),}
+                    }
+                    ],async function(err, records) {
+                    if (err) {
+                        console.error(err);
+                        alert(err);
+                        return;
+                    }
+                    await getSale_arr(records);
+                    resolve();
+                });
+            })
+        });
+    }
+    function getSale_arr(records){
+        return new Promise(resolve=>{
+            records.forEach(function(record){
+                var sale_temp = sale_arr;
+                console.log("typeof sale_temp="+typeof sale_temp);
+                console.log("sale_temp(before)="+sale_temp);
+                console.log(record.getId());
+                sale_temp.push(record.id);
+                setSaleArr(sale_temp);
+                console.log(sale_arr);
+                console.log("typeof sale_arr="+typeof sale_arr);
+            })
+            console.log("resolve");
+            resolve();
+        })
+    }
+    async function handleClick(){
+        await create_sale();
+        create_buy();
+    }
     return(
         <div>
             <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>新增資料</DialogTitle>
                 <DialogContent>
-                    <Autocomplete 
+                    <Autocomplete  
                     value={value_cus}
                     onChange={(event, newValue) => {
                         if(!newValue){
@@ -306,52 +358,67 @@ export default function Buy_create(){
                     選擇產品，
                     彈出視窗輸入該產品購買數量，
                     並新增至sale資料表 */}
-                    <Autocomplete
-                    freeSolo//可以任意輸入非選單內的文字
-                    multiple
-                    onChange={(event,newValue)=>{
-                            if(!newValue){
-                                console.log("!newValue");
-                            }
-                            console.log("product's newValue="+newValue);
-                            setTimeout(()=>{
-                                setDialogValue_sale({
-                                    recordId:newValue.recordId,
-                                    name:newValue.name,
-                                })
-                                openSaleDialog(true);
-                            })
-                        }}
-                    options={SelectProduct}
-                    getOptionLabel={(option) => option.name}
-                    selectOnFocus
-                    clearOnBlur
-                    renderInput={(params) => (
-                        <TextField {...params} label="有興趣的產品" margin="normal" />
-                    )}
-                    />
-                    <Dialog open={open_Sale} onClose={closeSaleDialog} aria-labelledby="form-dialog-title">
-                        <form onSubmit={handleSubmitSale}>
-                        <DialogTitle id="form-dialog-title">請輸入{dialogValue_sale.name}的購買數量</DialogTitle>
+                    <InputLabel>購買產品</InputLabel>
+                    <TextField button disabled fullWidth margin="dense" id="sale" onClick={handleSaleDialog} value={value_sale.map((sale)=>sale[0])}></TextField>
+                    <Dialog open={open_Sale} onClose={closeSaleDialog} fullWidth>
+                        <DialogTitle id="form-dialog-title">請輸入購買產品及數量</DialogTitle>
                         <DialogContent>
-                            <TextField
-                            margin="dense"
-                            id="count"
-                            value={dialogValue_sale.count}
-                            onChange={(event) => setDialogValue_sale({ ...dialogValue_sale, count: event.target.value })}
-                            label="數量"
-                            type="number"
-                            />
+                            <Grid container direction="row" justify="flex-end" spacing={3}>
+                                <Grid item xs>
+                                <Autocomplete
+                                freeSolo//可以任意輸入非選單內的文字
+                                value={saleName}
+                                options={SelectProduct}
+                                onChange={(event,newValue)=>{
+                                    if(!newValue){
+                                        console.log("!newValue");
+                                    }else{
+                                        setSaleName(newValue.name);
+                                        setSaleId(newValue.recordId);
+                                    }
+                                }}
+                                getOptionLabel={(option) =>{return option.name}}
+                                selectOnFocus
+                                clearOnBlur
+                                renderInput={(params) => (
+                                    <TextField {...params} label="產品名稱" margin="dense" size="medium"/>
+                                )}
+                                /></Grid>
+                                <Grid item xs>
+                                <TextField
+                                margin="dense"
+                                id="count"
+                                value={saleCount}
+                                onChange={ChangesaleCount}
+                                label="數量"
+                                type="number"
+                                /></Grid>
+                                <Grid item>
+                                    <label  onClick={addSale}>
+                                    <IconButton color="primary"><AddRoundedIcon/></IconButton>
+                                    </label>
+                                </Grid>
+                            </Grid>
+                            {value_sale.map((sale)=>(
+                                <Grid container direction="row" justify="flex-end" spacing={3}
+                                key={sale[0]}>
+                                    <Grid item xs>
+                                        <Typography color="secondary">{sale[0]}</Typography>
+                                    </Grid>
+                                    <Grid item xs>
+                                        <Typography color="secondary">{sale[1]}</Typography>
+                                    </Grid>  
+                                    <Grid item>
+                                        <IconButton color="primary"  onClick={deleteSale} getname={sale[0]}><DeleteRoundedIcon/></IconButton>
+                                    </Grid>
+                                </Grid>
+                            ))}
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={closeSaleDialog} color="primary">
-                            取消
-                            </Button>
-                            <Button type="submit" color="primary">
-                            新增
+                            完成
                             </Button>
                         </DialogActions>
-                        </form>
                     </Dialog>
                     <InputLabel>購買日期</InputLabel>
                     <TextField margin="dense" type="date" value={newBuyDate} onChange={ChangeBuyDate} fullWidth />
