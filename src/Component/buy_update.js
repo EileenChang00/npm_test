@@ -4,7 +4,9 @@ import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete
 import AddRoundedIcon from '@material-ui/icons/AddRounded';
 import DeleteRoundedIcon from '@material-ui/icons/DeleteRounded';
 
-export default function Buy_create(){
+export default function Buy_update(props){
+    const buy = props.buy;
+    console.log(props.update_id);
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
@@ -19,7 +21,47 @@ export default function Buy_create(){
     const handleClose = () =>{
         setOpen(false);
     }
-
+    //選單樣式
+    const ITEM_HEIGHT = 48;
+    const ITEM_PADDING_TOP = 8;
+    const MenuProps = {
+    PaperProps: {
+        style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+        },
+    },
+    };
+    //get & prepare update data
+    const [newCustomerId, setCustomerId] = useState(buy.fields.buy_cus_id);
+    const [newBuyDate, setBuyDate] = useState(buy.fields.buy_date);
+    const [newShippingDate, setShippingDate] = useState(buy.fields.buy_shippingdate);
+    const [newShop, setShop] = useState(buy.fields.buy_shop);
+    const [newEmployeeId, setEmployeeId] = useState(buy.fields.buy_em_id);
+    const [newActualPrice, setActualPrice] = useState(buy.fields.buy_actualprice);
+    const [newFixedPrice, setFixedPrice] = useState(buy.fields.buy_fixedprice);
+    const [newRemark, setRemark] = useState(buy.fields.buy_remark);
+    const ChangeBuyDate = (event) =>{
+        setBuyDate(event.target.value);
+    }
+    const ChangeShippingDate = (event) =>{
+        setShippingDate(event.target.value);
+    }
+    const ChangeShop = (event) =>{
+        setShop(event.target.value);
+    }
+    const ChangeEmployeeId = (event) =>{
+        setEmployeeId(event.target.value);
+    }
+    const ChangeActualPrice = (event) =>{
+        setActualPrice(event.target.value);
+    }
+    const ChangeFixedPrice = (event) =>{
+        setFixedPrice(event.target.value);
+    }
+    const ChangeRemark = (event) =>{
+        setRemark(event.target.value);
+    }
     //multiple choices select
     //顧客名稱選單
     const [SelectCustomer, setSelectCustomer] = useState([]);
@@ -39,7 +81,7 @@ export default function Buy_create(){
     },[])
     const filter = createFilterOptions();//選單內搜尋
     const [open_Customer, openCustomerDialog] = useState(false);//打開新增顧客視窗
-    const [value_cus, setValue_cus] = useState('');
+    const [value_cus, setValue_cus] = useState(buy.fields.buy_cus_name);
     const [dialogValue_cus, setDialogValue_cus] = useState({
         name: '',
         phone: '',
@@ -119,7 +161,23 @@ export default function Buy_create(){
         setSaleCount('');
         openSaleDialog(false);
     }
-    const [value_sale, setValue_sale] = useState([]);
+    //已選擇的sale
+    var buy_sale = [];
+    useEffect(()=>{
+        buy.fields.sale_id && buy.fields.sale_id.forEach(function(sale_id){
+            base('sale').find(sale_id, function(err, record) {
+                if (err) { console.error(err); return; }
+                console.log('Retrieved', record.id);
+                buy_sale.push([
+                    record.fields.product_name[0],
+                    record.fields.sale_count,
+                    record.fields.product[0]
+                ]);
+            });
+        })
+    },[]);
+    console.log(buy_sale);
+    const [value_sale, setValue_sale] = useState(buy_sale);
     const [saleName, setSaleName] = useState();
     const [saleId, setSaleId] = useState();
     const [saleCount, setSaleCount] = useState();
@@ -147,74 +205,39 @@ export default function Buy_create(){
         var sale_temp = value_sale.filter(item => item!==delete_sale);
         setValue_sale(sale_temp);
     }
-    //選單樣式
-    const ITEM_HEIGHT = 48;
-    const ITEM_PADDING_TOP = 8;
-    const MenuProps = {
-    PaperProps: {
-        style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-        },
-    },
-    };
-    //get & prepare update data
-    const [newCustomerId, setCustomerId] = useState('');
-    const [newBuyDate, setBuyDate] = useState(currentDate);
-    const [newShippingDate, setShippingDate] = useState('');
-    const [newShop, setShop] = useState('');
-    const [newEmployeeId, setEmployeeId] = useState('');
-    const [newActualPrice, setActualPrice] = useState('');
-    const [newFixedPrice, setFixedPrice] = useState('');
-    const [newRemark, setRemark] = useState('');
-    const ChangeBuyDate = (event) =>{
-        setBuyDate(event.target.value);
-    }
-    const ChangeShippingDate = (event) =>{
-        setShippingDate(event.target.value);
-    }
-    const ChangeShop = (event) =>{
-        setShop(event.target.value);
-    }
-    const ChangeEmployeeId = (event) =>{
-        setEmployeeId(event.target.value);
-    }
-    const ChangeActualPrice = (event) =>{
-        setActualPrice(event.target.value);
-    }
-    const ChangeFixedPrice = (event) =>{
-        setFixedPrice(event.target.value);
-    }
-    const ChangeRemark = (event) =>{
-        setRemark(event.target.value);
-    }
+    console.log(value_sale);
     const [sale_arr, setSaleArr] = useState([]);
-    //when 新增button is clicked
-        //新增購買資料
-    function handleClick(){ 
-        create_sale();
+    //When UpdateButton is clicked
+    function handleClick(){
+        if(!buy.fields.sale_id){
+            update_sale();
+        }else{
+            delete_sale();
+        }
     }
-     
-    function create_buy(){
+     console.log(newEmployeeId);
+    function update_buy(){
         console.log("buy");  
-        base('buy').create([
+        base('buy').update([
         newShippingDate ? 
-        {"fields": {
-            "buy_cus_id": [newCustomerId],
+        {"id": props.update_id,
+        "fields": {
+            "buy_cus_id": newCustomerId,
             "buy_date": newBuyDate, 
             "buy_shippingdate": newShippingDate,
             "buy_shop": newShop,
-            "buy_em_id":[newEmployeeId],
+            "buy_em_id": newEmployeeId,
             "buy_actualprice": newActualPrice,
             "buy_fixedprice":newFixedPrice,
             "buy_remark":newRemark,
             "sale_id":sale_arr,
             }
-        } : {"fields": {
-            "buy_cus_id": [newCustomerId],
+        } : {"id": props.update_id,
+        "fields": {
+            "buy_cus_id": newCustomerId,
             "buy_date": newBuyDate,
             "buy_shop": newShop,
-            "buy_em_id":[newEmployeeId],
+            "buy_em_id": newEmployeeId,
             "buy_actualprice": newActualPrice,
             "buy_fixedprice":newFixedPrice,
             "buy_remark":newRemark,
@@ -230,11 +253,21 @@ export default function Buy_create(){
         records.forEach(function (record) {
             console.log(record.getId());
         });
-        alert("完成新增");
+        alert("完成修改");
         });
         handleClose();
     }
-    function create_sale(){
+    function delete_sale(){
+        base('sale').destroy(buy.fields.sale_id, function(err, deletedRecords) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            console.log('Deleted', deletedRecords.length, 'records');
+            update_sale();
+        });
+    }
+    function update_sale(){
         var sales_records = value_sale.map((item)=>{return {fields: {
                     product: [item[2]],
                     sale_count: parseInt(item[1],10)}
@@ -256,13 +289,13 @@ export default function Buy_create(){
                     //console.log(sale_arr);
                     //console.log("typeof sale_arr="+typeof sale_arr);
                 });
-                create_buy();
+                update_buy();
             });
         
     };
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
+            <Button variant="contained" color="default" onClick={handleOpen} >修改</Button>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>新增資料</DialogTitle>
                 <DialogContent>
@@ -437,7 +470,7 @@ export default function Buy_create(){
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>取消</Button>
-                    <Button onClick={handleClick}>新增</Button>
+                    <Button onClick={handleClick}>修改</Button>
                 </DialogActions>
             </Dialog>
         </div>

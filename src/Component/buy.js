@@ -1,7 +1,9 @@
-import { Button, Table, TableCell, TableContainer, TableHead, TableRow, Checkbox, TableBody, Grid } from "@material-ui/core";
+import { Table, TableCell, TableContainer, TableHead, TableRow, Checkbox, TableBody, Grid } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import "./come.css";
 import Buy_create from "./buy_create";
+import Buy_delete from "./buy_delete";
+import Buy_update from "./buy_update";
 
 export default function Buy(){
     //connect airtable
@@ -21,7 +23,27 @@ export default function Buy(){
             if (err) { console.error(err); return; }
         });
     },[])
-    console.log(buy);
+    //將被勾選的資料id存進array
+    const [SelectedId_arr, setUpdateId] = useState([]);
+    const [SelectedBuy, setSelectedBuy] = useState([]);
+    const handleSelect = (event) =>{
+        //從勾選id得知哪筆資料要進行修改//勾選id=com_id
+        var new_select_id = event.target.getAttribute("id");
+        var new_arr = SelectedId_arr;
+        base('buy').select({
+            view: "Grid view",
+            filterByFormula: "{buy_id}='"+new_select_id+"'"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                setSelectedBuy(record);
+                new_arr.includes(record.id) ? new_arr=new_arr.filter(item=>item !== record.id) : new_arr=[...new_arr,record.id];//若紀錄已被勾選刪除紀錄，否則紀錄勾選id
+                setUpdateId(new_arr);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    }
     return(
         <div>
             <div className="heads">
@@ -29,10 +51,10 @@ export default function Buy(){
             </div>
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
                 <Grid item>
-                    <Button width="25px" variant="contained" color="default">修改</Button>
+                    {SelectedId_arr.length===1 && <Buy_update update_id={SelectedId_arr[0]} buy={SelectedBuy}/>}
                 </Grid>
                 <Grid item>
-                    <Button width="25px" variant="contained" color="secondary">刪除</Button>
+                    {SelectedId_arr.length>0 && <Buy_delete delete_id={SelectedId_arr}/>}
                 </Grid>
                 <Grid item><Buy_create /></Grid>
             </Grid>
@@ -62,7 +84,7 @@ export default function Buy(){
                             {buy.map((buy)=>(
                                 <TableRow key={buy.fields.buy_id}>
                                     <TableCell padding="checkbox">
-                                        <Checkbox id={buy.fields.buy_id.toString()} />
+                                        <Checkbox id={buy.fields.buy_id.toString()} onClick={handleSelect} />
                                     </TableCell>
                                     <TableCell>{buy.fields.buy_id}</TableCell>
                                     <TableCell>{buy.fields.buy_cus_name}</TableCell>
