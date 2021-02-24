@@ -152,6 +152,7 @@ export default function Buy_update(props){
             if (err) { console.error(err); return; }
         });
     },[])
+    //Sale Section
     const [open_Sale, openSaleDialog] = useState(false);
     const handleSaleDialog = () =>{
         openSaleDialog(true);
@@ -161,7 +162,7 @@ export default function Buy_update(props){
         setSaleCount('');
         openSaleDialog(false);
     }
-    //已選擇的sale
+        //已選擇的sale
     var buy_sale = [];
     useEffect(()=>{
         buy.fields.sale_id && buy.fields.sale_id.forEach(function(sale_id){
@@ -184,7 +185,7 @@ export default function Buy_update(props){
     const ChangesaleCount = (event) =>{
         setSaleCount(event.target.value);
     }
-    //點擊Add Icon
+        //點擊 Sale 的 Add Icon
     const addSale = () =>{
         value_sale.includes(saleName) ? value_sale.push([saleName,saleCount]) : value_sale.push([saleName,saleCount,saleId]);
         setValue_sale(value_sale);
@@ -192,7 +193,7 @@ export default function Buy_update(props){
         setSaleCount('');
         setSaleId('');
     }
-    //點擊Delete Icon
+        //點擊 Sale 的 Delete Icon
     const deleteSale = (event) =>{
         var delete_sale;
         value_sale.forEach(function(sale){
@@ -207,15 +208,79 @@ export default function Buy_update(props){
     }
     console.log(value_sale);
     const [sale_arr, setSaleArr] = useState([]);
+    //Gift Section
+    const [open_Gift, openGiftDialog] = useState(false);
+    const handleGiftDialog = () =>{
+        openGiftDialog(true);
+    }
+    const closeGiftDialog = () =>{
+        setGiftName('');
+        setGiftCount('');
+        openGiftDialog(false);
+    }
+        //已選擇的gift
+    var buy_gift = [];
+    useEffect(()=>{
+        buy.fields.buy_gift_id && buy.fields.buy_gift_id.forEach(function(gift_id){
+            base('gift').find(gift_id, function(err, record) {
+                if (err) { console.error(err); return; }
+                console.log('Retrieved', record.id);
+                buy_gift.push([
+                    record.fields.product_name[0],
+                    record.fields.gift_count,
+                    record.fields.product[0]
+                ]);
+            });
+        })
+    },[]);
+    console.log(buy_gift);
+    const [value_gift, setValue_gift] = useState(buy_gift);
+    const [giftName, setGiftName] = useState();
+    const [giftId, setGiftId] = useState();
+    const [giftCount, setGiftCount] = useState();
+    const ChangegiftCount = (event) =>{
+        setGiftCount(event.target.value);
+    }
+        //點擊 Gift 的 Add Icon
+    const addGift = () =>{
+        value_gift.includes(giftName) ? value_gift.push([giftName,giftCount]) : value_gift.push([giftName,giftCount,giftId]);
+        setValue_gift(value_gift);
+        setGiftName('');
+        setGiftCount('');
+        setGiftId('');
+    }
+        //點擊 Gift 的 Delete Icon
+    const deleteGift = (event) =>{
+        var delete_gift;
+        value_gift.forEach(function(gift){
+            console.log(event.currentTarget.getAttribute("getname"));
+            if(gift[0]===event.currentTarget.getAttribute("getname")){
+                delete_gift = gift;
+                console.log(delete_gift);
+            }
+        })
+        var gift_temp = value_gift.filter(item => item!==delete_gift);
+        setValue_gift(gift_temp);
+    }
+    console.log(value_gift);
+    const [gift_arr, setGiftArr] = useState([]);
     //When UpdateButton is clicked
     function handleClick(){
-        if(!buy.fields.sale_id){
+        if(!buy.fields.sale_id && !buy.fields.buy_gift_id){
             update_sale();
-        }else{
+            update_gift();
+        }else if(typeof buy.fields.sale_id === "object" && !buy.fields.buy_gift_id){
             delete_sale();
+            update_gift();
+        }else if(!buy.fields.sale_id && typeof buy.fields.buy_gift_id === "object"){
+            update_sale();
+            delete_gift();
+        }
+        else{
+            delete_sale();
+            delete_gift();
         }
     }
-     console.log(newEmployeeId);
     function update_buy(){
         console.log("buy");  
         base('buy').update([
@@ -231,6 +296,7 @@ export default function Buy_update(props){
             "buy_fixedprice":newFixedPrice,
             "buy_remark":newRemark,
             "sale_id":sale_arr,
+            "buy_gift_id":gift_arr,
             }
         } : {"id": props.update_id,
         "fields": {
@@ -242,6 +308,7 @@ export default function Buy_update(props){
             "buy_fixedprice":newFixedPrice,
             "buy_remark":newRemark,
             "sale_id":sale_arr,
+            "buy_gift_id":gift_arr,
             }
         }
         ], function(err, records) {
@@ -271,8 +338,11 @@ export default function Buy_update(props){
         var sales_records = value_sale.map((item)=>{return {fields: {
                     product: [item[2]],
                     sale_count: parseInt(item[1],10)}
-                }})
-            //console.log(sales_records);
+            }})
+        //console.log(sales_records);
+        if(!value_sale[0]){
+            alert("請選擇購買產品");
+        }else{
             base('sale').create(sales_records, function(err, records) {
                 if (err) {
                     console.error(err);
@@ -291,7 +361,47 @@ export default function Buy_update(props){
                 });
                 update_buy();
             });
-        
+        }
+    };
+    function delete_gift(){
+        base('gift').destroy(buy.fields.buy_gift_id, function(err, deletedRecords) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            console.log('Deleted', deletedRecords.length, 'records');
+            update_gift();
+        });
+    }
+    function update_gift(){
+        var gifts_records = value_gift.map((item)=>{return {fields: {
+                    product: [item[2]],
+                    gift_count: parseInt(item[1],10)}
+            }})
+        //console.log(sales_records);
+        if(!value_gift[0]){
+            console.log("no gift");
+            update_buy();
+        }else{ 
+            base('gift').create(gifts_records, function(err, records) {
+                if (err) {
+                    console.error(err);
+                    alert(err);
+                    return;
+                }
+                records.forEach(function(record){
+                    var gift_temp = gift_arr;
+                    //console.log("typeof sale_temp="+typeof sale_temp);
+                    //console.log("sale_temp(before)="+sale_temp);
+                    //console.log(record.getId());
+                    gift_temp.push(record.id);
+                    setGiftArr(gift_temp);
+                    //console.log(sale_arr);
+                    //console.log("typeof sale_arr="+typeof sale_arr);
+                });
+                update_buy();
+            });
+        }
     };
     return(
         <div>
@@ -465,7 +575,68 @@ export default function Buy_update(props){
                     選擇贈品，
                     彈出視窗輸入該贈品數量，
                     並新增至gift資料表 */}
-                    <TextField margin="dense" label="贈品名稱" type="text" fullWidth />
+                    <InputLabel>贈品</InputLabel>
+                    <TextField button disabled fullWidth margin="dense" id="gift" onClick={handleGiftDialog} value={value_gift.map((gift)=>gift[0])}></TextField>
+                    <Dialog open={open_Gift} onClose={closeGiftDialog} fullWidth>
+                        <DialogTitle id="form-dialog-title">請輸入購買產品及數量</DialogTitle>
+                        <DialogContent>
+                            <Grid container direction="row" justify="flex-end" spacing={3}>
+                                <Grid item xs>
+                                <Autocomplete
+                                freeSolo//可以任意輸入非選單內的文字
+                                value={giftName}
+                                options={SelectProduct}
+                                onChange={(event,newValue)=>{
+                                    if(!newValue){
+                                        console.log("!newValue");
+                                    }else{
+                                        setGiftName(newValue.name);
+                                        setGiftId(newValue.recordId);
+                                    }
+                                }}
+                                getOptionLabel={(option) =>{return option.name}}
+                                selectOnFocus
+                                clearOnBlur
+                                renderInput={(params) => (
+                                    <TextField {...params} label="產品名稱" margin="dense" size="medium"/>
+                                )}
+                                /></Grid>
+                                <Grid item xs>
+                                <TextField
+                                margin="dense"
+                                id="count"
+                                value={giftCount}
+                                onChange={ChangegiftCount}
+                                label="數量"
+                                type="number"
+                                /></Grid>
+                                <Grid item>
+                                    <label  onClick={addGift}>
+                                    <IconButton color="primary"><AddRoundedIcon/></IconButton>
+                                    </label>
+                                </Grid>
+                            </Grid>
+                            {value_gift.map((gift)=>(
+                                <Grid container direction="row" justify="flex-end" spacing={3}
+                                key={gift[0]}>
+                                    <Grid item xs>
+                                        <Typography color="secondary">{gift[0]}</Typography>
+                                    </Grid>
+                                    <Grid item xs>
+                                        <Typography color="secondary">{gift[1]}</Typography>
+                                    </Grid>  
+                                    <Grid item>
+                                        <IconButton color="primary"  onClick={deleteGift} getname={gift[0]}><DeleteRoundedIcon/></IconButton>
+                                    </Grid>
+                                </Grid>
+                            ))}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={closeGiftDialog} color="primary">
+                            完成
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />
                 </DialogContent>
                 <DialogActions>
