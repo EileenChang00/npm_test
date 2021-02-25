@@ -11,6 +11,8 @@ export default function Buy_create(){
     //import moment
     var moment = require('moment');
     const currentDate = moment().format('YYYY-MM-DD');
+    const serviceDate = moment().add(6,"month").format('YYYY-MM-DD');
+    console.log(serviceDate);
     //open 新增 Dialog
     const [open, setOpen] = useState(false);
     const handleOpen = () =>{
@@ -102,7 +104,8 @@ export default function Buy_create(){
             records.forEach(function(record) {
                 SelectProduct.push({
                     recordId:record.id,
-                    name:record.fields.product_name});
+                    name:record.fields.product_name,
+                    category:record.fields.product_category,});
                 setSelectProduct(SelectProduct);
             });
             fetchNextPage();
@@ -123,17 +126,19 @@ export default function Buy_create(){
     const [value_sale, setValue_sale] = useState([]);
     const [saleName, setSaleName] = useState();
     const [saleId, setSaleId] = useState();
+    const [saleCategory, setSaleCategory] = useState();
     const [saleCount, setSaleCount] = useState();
     const ChangesaleCount = (event) =>{
         setSaleCount(event.target.value);
     }
         //點擊 Sale 的 Add Icon
     const addSale = () =>{
-        value_sale.includes(saleName) ? value_sale.push([saleName,saleCount]) : value_sale.push([saleName,saleCount,saleId]);
+        value_sale.includes(saleName) ? value_sale.push([saleName,saleCount]) : value_sale.push([saleName,saleCount,saleId,saleCategory]);
         setValue_sale(value_sale);
         setSaleName('');
         setSaleCount('');
         setSaleId('');
+        setSaleCategory('');
     }
         //點擊 Sale 的 Delete Icon
     const deleteSale = (event) =>{
@@ -161,17 +166,19 @@ export default function Buy_create(){
     const [value_gift, setValue_gift] = useState([]);
     const [giftName, setGiftName] = useState();
     const [giftId, setGiftId] = useState();
+    const [giftCategory, setGiftCategory] = useState();
     const [giftCount, setGiftCount] = useState();
     const ChangegiftCount = (event) =>{
         setGiftCount(event.target.value);
     }
         //點擊 Gift 的 Add Icon
     const addGift = () =>{
-        value_gift.includes(giftName) ? value_gift.push([giftName,giftCount]) : value_gift.push([giftName,giftCount,giftId]);
+        value_gift.includes(giftName) ? value_gift.push([giftName,giftCount]) : value_gift.push([giftName,giftCount,giftId,giftCategory]);
         setValue_gift(value_gift);
         setGiftName('');
         setGiftCount('');
         setGiftId('');
+        setGiftCategory('');
     }
         //點擊 Gift 的 Delete Icon
     const deleteGift = (event) =>{
@@ -234,7 +241,6 @@ export default function Buy_create(){
     function handleClick(){ 
         create_sale();
     }
-     
     function create_buy(){
         console.log("buy");  
         base('buy').create([
@@ -271,6 +277,7 @@ export default function Buy_create(){
         }
         records.forEach(function (record) {
             console.log(record.getId());
+            create_service(record);
         });
         alert("完成新增");
         });
@@ -309,7 +316,7 @@ export default function Buy_create(){
         var gifts_records = value_gift.map((item)=>{return {fields: {
                     product: [item[2]],
                     gift_count: parseInt(item[1],10)}
-                }})
+        }})
         //console.log(sales_records);
         if(!value_gift[0]){
             console.log("no gift");
@@ -335,6 +342,40 @@ export default function Buy_create(){
             });
         }
     };
+    const [service, setService] = useState([]);
+    async function create_service(buy){
+        var values_service = [value_sale.map((item)=>item),value_gift.map((item)=>item)];
+        await values_service.forEach(function(value_service){
+            if(value_service[0][3] === "床墊"){
+                service.push({
+                    ser_productname:value_service[0][0],
+                    ser_buy_id:[buy.id],
+                    ser_cus_id:[buy.fields.buy_cus_id[0]],
+                    ser_project:"寄送小卡",
+                    ser_actualdate:serviceDate,});
+                setService(service);
+            }
+            console.log("done");
+        });
+        console.log("finish await");
+        var service_records = service.map((item)=>{return {fields: {
+            ser_productname : item.ser_productname,
+            ser_buy_id: item.ser_buy_id,
+            ser_cus_id : item.ser_cus_id,
+            ser_actualdate: item.ser_actualdate,
+            ser_project: item.ser_project,
+            }}})
+        base('service').create(service_records, function(err, records) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        records.forEach(function (record) {
+            console.log(record.getId());
+        });
+        });
+    }
+    console.log(service);
     return(
         <div>
             <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
@@ -440,6 +481,7 @@ export default function Buy_create(){
                                     }else{
                                         setSaleName(newValue.name);
                                         setSaleId(newValue.recordId);
+                                        setSaleCategory(newValue.category);
                                     }
                                 }}
                                 getOptionLabel={(option) =>{return option.name}}
@@ -524,6 +566,7 @@ export default function Buy_create(){
                                     }else{
                                         setGiftName(newValue.name);
                                         setGiftId(newValue.recordId);
+                                        setGiftCategory(newValue.category);
                                     }
                                 }}
                                 getOptionLabel={(option) =>{return option.name}}

@@ -58,7 +58,7 @@ export default function Customer(){
                 <Grid item>
                     {SelectedId_arr.length>0 && <Customer_delete delete_id={SelectedId_arr} />}
                 </Grid>
-                <Gird item><Customer_create /></Gird>
+                <Grid item><Customer_create /></Grid>
             </Grid>
             <div className="container">
                 <TableContainer>
