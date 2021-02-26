@@ -10,6 +10,7 @@ import Employee from "./Component/employee";
 import Buy from "./Component/buy";
 import Service from "./Component/service";
 import Reservation from "./Component/reservation";
+import Firm from "./Component/firm";
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 
 
@@ -26,5 +27,6 @@ ReactDOM.render(
         <Route path="/buy" component={Buy} />
         <Route path="/service" component={Service} />
         <Route path="/reservation" component={Reservation} />
+        <Route path="/firm" component={Firm} />
     </Switch>
     </BrowserRouter>, document.getElementById("root"));

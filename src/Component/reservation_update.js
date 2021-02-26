@@ -146,7 +146,7 @@ export default function Reservation_update(props){
         });
         });
         handleClose();
-    }
+    };
     return(
         <div>
             <Button variant="contained" color="default" onClick={handleOpen} >修改</Button>

@@ -1,7 +1,6 @@
 import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuItem, TextField, DialogActions } from "@material-ui/core";
 import { useState, useEffect } from 'react';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import { SettingsRemoteOutlined } from "@material-ui/icons";
 
 export default function Reservation_create(){
     //connect airtable
