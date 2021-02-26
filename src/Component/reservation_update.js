@@ -1,15 +1,14 @@
-import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuItem, TextField, DialogActions } from "@material-ui/core";
-import { useState, useEffect } from 'react';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, InputLabel } from "@material-ui/core";
+import { useEffect, useState } from 'react';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
-export default function Service_create(){
+export default function Reservation_update(props){
+    const reservation = props.reservation;
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
     //import moment
     var moment = require('moment');
-    const currentDate = moment().format('YYYY-MM-DDTHH:mm');
-    console.log(currentDate);
     //control Update-Dialog open
     const [open,setOpen] = useState(false);
     const handleOpen = () =>{
@@ -37,7 +36,7 @@ export default function Service_create(){
     },[])
     const filter = createFilterOptions();//選單內搜尋
     const [open_Customer, openCustomerDialog] = useState(false);//打開新增顧客視窗
-    const [value_cus, setValue_cus] = useState('');
+    const [value_cus, setValue_cus] = useState(reservation.fields.res_cus_name);
     const [dialogValue_cus, setDialogValue_cus] = useState({
         name: '',
         phone: '',
@@ -68,32 +67,7 @@ export default function Service_create(){
     });
     setValue_cus(dialogValue_cus.name);
     closeCustomerDialog();
-    }
-    //產品名稱選單
-    const [SelectProduct, setSelectProduct] = useState([]);
-    useEffect(()=>{
-        base('product').select({
-            view: "Grid view"
-        }).eachPage(function page(records, fetchNextPage) {
-            records.forEach(function(record) {
-                SelectProduct.push({
-                    recordId:record.id,
-                    name:record.fields.product_name});
-                setSelectProduct(SelectProduct);
-            });
-            fetchNextPage();
-        }, function done(err) {
-            if (err) { console.error(err); return; }
-        });
-    },[])
-    //服務項目選單
-    const ProjectChoice = [
-        {id:"card", name:"寄送小卡"},
-        {id:"bed", name:"翻床墊"},
-        {id:"battery", name:"換電池"},
-        {id:"pillow", name:"換枕頭"},
-    ]
-    //員工名稱選單
+    }//員工名稱選單
     const [SelectEmployee, setSelectEmployee] = useState([]);
     useEffect(()=>{
         base('employee').select({
@@ -110,6 +84,12 @@ export default function Service_create(){
             if (err) { console.error(err); return; }
         });
     },[])
+    //後續狀態選單
+    const StatusChoice = [
+        {id:"complete", name:"完成"},
+        {id:"Reschedule", name:"改期"},
+        {id:"cancel", name:"取消"},
+    ]
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -123,61 +103,62 @@ export default function Service_create(){
     };
 
     //get & prepare update data
-    const [newCustomerId, setCustomerId] = useState('');
-    const [newProductName, setProductName] = useState('');
-    const [newServiceDate, setServiceDate] = useState(currentDate);
-    const ChangeServiceDate = (event) =>{
-        setServiceDate(event.target.value);
+    const [newCustomerId, setCustomerId] = useState(reservation.fields.res_cus_id);
+    const [newPhone, setPhone] = useState(reservation.fields.res_cus_phone);
+    const ChangePhone = (event) =>{
+        setPhone(event.target.value);
     };
-    const [newProject, setProject] = useState('');
-    const ChangeProject = (event) =>{
-        setProject(event.target.value);
+    const [newDate, setDate] = useState(moment(reservation.fields.res_date).format('YYYY-MM-DDTHH:mm'));
+    const ChangeDate = (event) =>{
+        setDate(event.target.value);
     };
-    const [newEmployeeId, setEmployeeId] = useState('');
+    const [newEmployeeId, setEmployeeId] = useState(reservation.fields.res_em_id);
     const ChangeEmployeeId = (event) =>{
-        setEmployeeId(event.target.value);
+        setEmployeeId([event.target.value]);
     };
-    const [newRemark, setRemark] = useState('');
+    const [newStatus, setStatus] = useState(reservation.fields.res_status);
+    const ChangeStatus = (event) =>{
+        setStatus(event.target.value);
+    };
+    const [newRemark, setRemark] = useState(reservation.fields.res_remark);
     const ChangeRemark = (event) =>{
         setRemark(event.target.value);
     };
-    //when Create button is clicked
+    //When UpdateButton is clicked
     function handleClick(){
-        base('service').create([
-        {
+        base('reservation').update([
+        {"id": props.update_id,
             "fields": {
-            "ser_cus_id" : [newCustomerId],
-            "ser_productname" : newProductName,
-            "ser_actualdate": newServiceDate,
-            "ser_project": newProject,
-            "ser_em_id": [newEmployeeId],
-            "ser_remark" : newRemark,
+            "res_cus_id" : newCustomerId,
+            "res_date": moment(newDate).format('YYYY-MM-DDTHH:mm:ssZ'),
+            "res_em_id": newEmployeeId,
+            "res_status": newStatus,
+            "res_remark" : newRemark,
             }
-        }
-        ], function(err, records) {
+        }], function(err, records) {
         if (err) {
             console.error(err);
             alert(err);
             return;
-        }
-        records.forEach(function (record) {
-            console.log(record.getId());
-            alert("完成新增");
+        }records.forEach(function(record) {
+            console.log(record.get('res_id'));
+            alert("完成修改");
         });
         });
         handleClose();
     }
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
-            <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="xs">
-                <DialogTitle>新增資料</DialogTitle>
+            <Button variant="contained" color="default" onClick={handleOpen} >修改</Button>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>修改資料</DialogTitle>
                 <DialogContent>
+                    <DialogContent>
                     <Autocomplete 
                     value={value_cus}
                     onChange={(event, newValue) => {
                         if(!newValue){
-                            console.log('newValue');
+                            console.log('!newValue');
                         }else if (newValue && newValue[0].search(newValue[1]) !== -1) {
                             // timeout to avoid instant validation of the dialog's form.
                             setTimeout(() => {
@@ -189,7 +170,8 @@ export default function Service_create(){
                             });
                         }else {
                             setValue_cus(newValue[0]);
-                            setCustomerId(newValue[2]);
+                            setCustomerId([newValue[2]]);
+                            setPhone(newValue[1]);
                         }
                         }}
                     filterOptions={(options, params) => {
@@ -250,40 +232,28 @@ export default function Service_create(){
                         </DialogActions>
                         </form>
                     </Dialog>
-                    <Autocomplete
-                    freeSolo
-                    onChange={(event,newValue)=>{
-                        if(!newValue){
-                            console.log("!newValue");
-                        }
-                        setProductName(newValue.name);
-                    }}
-                    options={SelectProduct}
-                    getOptionLabel={(option) => option.name}
-                    renderInput={(params) => (
-                    <TextField {...params} label="產品名稱" margin="normal" />
-                    )}
-                    />
-                    <InputLabel>來訪日期</InputLabel>
-                    <TextField margin="dense" type="datetime-local" value={newServiceDate} onChange={ChangeServiceDate} fullWidth />
-                    <InputLabel>服務項目</InputLabel>
-                    <Select label="服務項目" fullWidth value={newProject} onChange={ChangeProject} MenuProps={MenuProps}>
-                        {ProjectChoice.map((list) =>(
-                            <MenuItem key={list.id} value={list.name}>{list.name}</MenuItem>
-                        ))}
-                    </Select>
+                    <TextField margin="dense" label="手機" type="text" value={newPhone} onChange={ChangePhone} fullWidth />
+                    <InputLabel>預約日期</InputLabel>
+                    <TextField margin="dense" type="datetime-local" value={newDate} onChange={ChangeDate} fullWidth />
                     <InputLabel>負責員工名稱</InputLabel>
                     <Select label="負責員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
                         {SelectEmployee.map((nameList) =>(
                             <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
                     </Select>
+                    <InputLabel>後續狀態</InputLabel>
+                    <Select label="後續狀態" fullWidth value={newStatus} onChange={ChangeStatus} MenuProps={MenuProps}>
+                        {StatusChoice.map((list) =>(
+                            <MenuItem key={list.id} value={list.name}>{list.name}</MenuItem>
+                        ))}
+                    </Select>
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>取消</Button>
-                    <Button onClick={handleClick}>新增</Button>
+                    <Button onClick={handleClick}>修改</Button>
                 </DialogActions>
+                </DialogContent>
             </Dialog>
         </div>
     )
