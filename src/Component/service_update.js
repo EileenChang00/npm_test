@@ -1,16 +1,14 @@
-import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuItem, TextField, DialogActions } from "@material-ui/core";
-import { useState, useEffect } from 'react';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, InputLabel } from "@material-ui/core";
+import { useEffect, useState } from 'react';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
-
-export default function Come_create(){
+export default function Service_update(props){
+    const service = props.service;
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
     //import moment
     var moment = require('moment');
-    const currentDate = moment().format('YYYY-MM-DD');
-    console.log(currentDate);
     //control Update-Dialog open
     const [open,setOpen] = useState(false);
     const handleOpen = () =>{
@@ -38,7 +36,7 @@ export default function Come_create(){
     },[])
     const filter = createFilterOptions();//選單內搜尋
     const [open_Customer, openCustomerDialog] = useState(false);//打開新增顧客視窗
-    const [value_cus, setValue_cus] = useState('');
+    const [value_cus, setValue_cus] = useState(service.fields.ser_cus_name);
     const [dialogValue_cus, setDialogValue_cus] = useState({
         name: '',
         phone: '',
@@ -70,24 +68,6 @@ export default function Come_create(){
     setValue_cus(dialogValue_cus.name);
     closeCustomerDialog();
     }
-
-    //員工名稱選單
-    const [SelectEmployee, setSelectEmployee] = useState([]);
-    useEffect(()=>{
-        base('employee').select({
-            view: "Grid view"
-        }).eachPage(function page(records, fetchNextPage) {
-            records.forEach(function(record) {
-                SelectEmployee.push({
-                    recordId:record.id,
-                    name:record.fields.em_name});
-                setSelectEmployee(SelectEmployee);
-            });
-            fetchNextPage();
-        }, function done(err) {
-            if (err) { console.error(err); return; }
-        });
-    },[])
     //產品名稱選單
     const [SelectProduct, setSelectProduct] = useState([]);
     useEffect(()=>{
@@ -105,7 +85,31 @@ export default function Come_create(){
             if (err) { console.error(err); return; }
         });
     },[])
-    console.log(SelectProduct);
+    const [value_prod, setValue_prod] = useState(service.fields.ser_productname);
+    //服務項目選單
+    const ProjectChoice = [
+        {id:"card", name:"寄送小卡"},
+        {id:"bed", name:"翻床墊"},
+        {id:"battery", name:"換電池"},
+        {id:"pillow", name:"換枕頭"},
+    ]
+    //員工名稱選單
+    const [SelectEmployee, setSelectEmployee] = useState([]);
+    useEffect(()=>{
+        base('employee').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                SelectEmployee.push({
+                    recordId:record.id,
+                    name:record.fields.em_name});
+                setSelectEmployee(SelectEmployee);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -117,64 +121,60 @@ export default function Come_create(){
         },
     },
     };
-
     //get & prepare update data
-    const [newCustomerId, setCustomerId] = useState('');
-    const [newComeDate, setComeDate] = useState(currentDate);
-    const ChangeComeDate = (event) =>{
-        setComeDate(event.target.value);
+    const [newCustomerId, setCustomerId] = useState(service.fields.ser_cus_id);
+    const [newProductName, setProductName] = useState(service.fields.ser_productname);
+    const [newServiceDate, setServiceDate] = useState(moment(service.fields.ser_actualdate).format('YYYY-MM-DDTHH:mm'));
+    const ChangeServiceDate = (event) =>{
+        setServiceDate(event.target.value);
     };
-    const [newEmployeeId, setEmployeeId] = useState('');
+    console.log("service date="+newServiceDate);
+    const [newProject, setProject] = useState(service.fields.ser_project);
+    const ChangeProject = (event) =>{
+        setProject(event.target.value);
+    };
+    const [newEmployeeId, setEmployeeId] = useState(service.fields.ser_em_id);
     const ChangeEmployeeId = (event) =>{
-        setEmployeeId(event.target.value);
+        setEmployeeId([event.target.value]);
     };
-    const [newKnow, setKnow] = useState('');
-    const ChangeKnow = (event) =>{
-        setKnow(event.target.value);
-    };
-    const [newProductId, setProductId] = useState([]);
-    const [newTime, setTime] = useState('');
-    const ChangeTime = (event) =>{
-        setTime(event.target.value);
-    };
-    const [newRemark, setRemark] = useState('');
+    console.log(newEmployeeId);
+    const [newRemark, setRemark] = useState(service.fields.ser_remark);
     const ChangeRemark = (event) =>{
         setRemark(event.target.value);
     };
-    //when Create button is clicked
+    //When UpdateButton is clicked
     function handleClick(){
-        base('come').create([
-        {
+        base('service').update([
+        {"id": props.update_id,
             "fields": {
-            "com_cus_id": [newCustomerId],
-            "com_date": newComeDate,
-            "com_em_id": [newEmployeeId],
-            "com_know": newKnow,
-            "com_time": newTime,
-            "com_remark": newRemark,
-            "com_product_id": newProductId
+            "ser_cus_id" : newCustomerId,
+            "ser_productname" : newProductName,
+            "ser_actualdate": newServiceDate,
+            "ser_project": newProject,
+            "ser_em_id": newEmployeeId,
+            "ser_remark" : newRemark,
             }
-        },
-        ], function(err, records) {
+        }], function(err, records) {
         if (err) {
             console.error(err);
             alert(err);
             return;
-        }
-        alert("完成新增");
+        }records.forEach(function(record) {
+            console.log(record.get('ser_id'));
+            alert("完成修改");
+        });
         });
         handleClose();
     }
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
+            <Button variant="contained" color="default" onClick={handleOpen} >修改</Button>
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>新增資料</DialogTitle>
+                <DialogTitle>修改資料</DialogTitle>
                 <DialogContent>
                     <Autocomplete 
                     value={value_cus}
                     onChange={(event, newValue) => {
-                        console.log(newValue);
                         if(!newValue){
                             console.log('newValue');
                         }else if (newValue && newValue[0].search(newValue[1]) !== -1) {
@@ -188,7 +188,7 @@ export default function Come_create(){
                             });
                         }else {
                             setValue_cus(newValue[0]);
-                            setCustomerId(newValue[2]);
+                            setCustomerId([newValue[2]]);
                         }
                         }}
                     filterOptions={(options, params) => {
@@ -249,37 +249,52 @@ export default function Come_create(){
                         </DialogActions>
                         </form>
                     </Dialog>
+                    <Autocomplete
+                        freeSolo
+                        value={value_prod}
+                        onChange={(event,newValue)=>{
+                            console.log(newValue);
+                            if(!newValue){
+                                console.log("!newValue");
+                            }else{
+                                console.log("setProductName"+newValue.name);
+                                setProductName(newValue.name);
+                                setValue_prod(newValue);
+                            }
+                        }}
+                        options={SelectProduct}
+                        getOptionLabel={(option) => {
+                            if(typeof option === "string"){
+                                console.log("string");
+                                return option;
+                            }
+                            console.log("else");
+                            return option.name;
+                        }}
+                        renderOption={(option)=>option.name}
+                        renderInput={(params) => (
+                        <TextField {...params} label="產品名稱" margin="normal" />
+                        )}
+                    />
                     <InputLabel>來訪日期</InputLabel>
-                    <TextField margin="dense" type="date" value={newComeDate} onChange={ChangeComeDate} fullWidth />
+                    <TextField margin="dense" type="datetime-local" value={newServiceDate} onChange={ChangeServiceDate} fullWidth />
+                    <InputLabel>服務項目</InputLabel>
+                    <Select label="服務項目" fullWidth value={newProject} onChange={ChangeProject} MenuProps={MenuProps}>
+                        {ProjectChoice.map((list) =>(
+                            <MenuItem key={list.id} value={list.name}>{list.name}</MenuItem>
+                        ))}
+                    </Select>
                     <InputLabel>負責員工名稱</InputLabel>
                     <Select label="負責員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
                         {SelectEmployee.map((nameList) =>(
                             <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
                     </Select>
-                    <TextField margin="dense" label="得知管道" type="text" value={newKnow} onChange={ChangeKnow} fullWidth />
-                    <Autocomplete
-                        freeSolo
-                        multiple
-                        onChange={(event,newValue)=>{
-                            if(!newValue){
-                                console.log("!newValue");
-                            }
-                            console.log(newValue);
-                            setProductId(newValue.map((product)=>product.recordId));
-                        }}
-                        options={SelectProduct}
-                        getOptionLabel={(option) => option.name}
-                        renderInput={(params) => (
-                        <TextField {...params} label="有興趣的產品" margin="normal" />
-                        )}
-                    />
-                    <TextField margin="dense" label="停留時長" type="text" value={newTime} onChange={ChangeTime} fullWidth />
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>取消</Button>
-                    <Button onClick={handleClick}>新增</Button>
+                    <Button onClick={handleClick}>修改</Button>
                 </DialogActions>
             </Dialog>
         </div>

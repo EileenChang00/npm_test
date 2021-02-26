@@ -8,6 +8,7 @@ import Customer from "./Component/customer";
 import Product from "./Component/product";
 import Employee from "./Component/employee";
 import Buy from "./Component/buy";
+import Service from "./Component/service";
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 
 
@@ -22,5 +23,6 @@ ReactDOM.render(
         <Route path="/product" component={Product} />
         <Route path="/employee" component={Employee} />
         <Route path="/buy" component={Buy} />
+        <Route path="/service" component={Service} />
     </Switch>
     </BrowserRouter>, document.getElementById("root"));
