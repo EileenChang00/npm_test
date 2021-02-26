@@ -1,6 +1,5 @@
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, InputLabel } from "@material-ui/core";
 import { useEffect, useState } from 'react';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
 export default function Firm_update(props){
     const firm = props.firm;

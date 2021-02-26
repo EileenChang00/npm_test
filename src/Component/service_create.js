@@ -23,7 +23,7 @@ export default function Service_create(){
     const [SelectCustomer, setSelectCustomer] = useState([]);
     useEffect(()=>{
         base('customer').select({
-        view: "Grid view"
+        view: "Grid view2"
     }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
             SelectCustomer.push([record.fields.cus_name,record.fields.cus_phone,record.id]);
