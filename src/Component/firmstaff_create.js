@@ -71,7 +71,7 @@ export default function Firmstaff_create(){
     function handleClick(){
         base('firmstaff').create([
             newFirmId ? {
-            "fields": {
+            "fields": {  
             "firmstaff_name" : newName,
             "firmstaff_firm_id": [newFirmId],
             "firmstaff_phone": newPhone,
