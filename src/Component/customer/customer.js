@@ -1,9 +1,9 @@
 import { Grid, Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
 import { useEffect, useState } from "react";
-import "./come.css";
-import Customer_create from "./customer_create";
-import Customer_update from "./customer_update";
-import Customer_delete from "./customer_delete";
+import "../come.css";
+import CustomerCreate from "./customer_create";
+import CustomerUpdate from "./customer_update";
+import CustomerDelete from "./customer_delete";
 
 export default function Customer(){
     //connect airtable
@@ -53,12 +53,12 @@ export default function Customer(){
             </div>
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
                 <Grid item>
-                    {SelectedId_arr.length===1 && <Customer_update update_id={SelectedId_arr[0]}  customer={SelectedCustomer} />}
+                    {SelectedId_arr.length===1 && <CustomerUpdate update_id={SelectedId_arr[0]}  customer={SelectedCustomer} />}
                 </Grid>
                 <Grid item>
-                    {SelectedId_arr.length>0 && <Customer_delete delete_id={SelectedId_arr} />}
+                    {SelectedId_arr.length>0 && <CustomerDelete delete_id={SelectedId_arr} />}
                 </Grid>
-                <Grid item><Customer_create /></Grid>
+                <Grid item><CustomerCreate /></Grid>
             </Grid>
             <div className="container">
                 <TableContainer>

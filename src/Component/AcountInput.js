@@ -18,7 +18,7 @@ export default function AccountInput() {
     console.log (result);
     try{
       if (password === result.data.records[0].fields.em_password){
-        history.push("/App");
+        history.push("/home");
       }
   } catch(error){
     alert("此帳號不存在，請重新登入");

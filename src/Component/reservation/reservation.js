@@ -1,42 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
-import "./come.css";
-import Come_update from "./come_update"
-import Come_create from "./come_create"
-import Come_delete from "./come_delete"
+import { Grid, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
+import "../come.css";
+import ReservationCreate from "./reservation_create";
+import ReservationUpdate from "./reservation_update";
+import ReservationDelete from "./reservation_delete";
 
-export default function Come(){
+export default function Reservation(){
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
-    //get 'come'records as come
-    const [come, setCome] = useState([]);
+    //import moment
+    var moment = require('moment');
+    //get 'reservation' records as reservation
+    const [reservation, setReservation] = useState([]);
     useEffect(()=>{
-        base('come').select({
+        base('reservation').select({
             view: "Grid view"
         }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
-            setCome(records);
+            setReservation(records);
         });
         fetchNextPage();
         }, function done(err) {
             if (err) { console.error(err); return; }
         });
-    },[])
-
+    },[]);
     //將被勾選的資料id存進array
     const [SelectedId_arr, setUpdateId] = useState([]);
-    const [SelectedCome, setSelectedCome] = useState([]);
+    const [SelectedReservation, setSelectedReservation] = useState([]);
     const handleSelect = (event) =>{
         //從勾選id得知哪筆資料要進行修改//勾選id=com_id
         var new_select_id = event.target.getAttribute("id");
         var new_arr = SelectedId_arr;
-        base('come').select({
+        base('reservation').select({
             view: "Grid view",
-            filterByFormula: "{com_id}='"+new_select_id+"'"
+            filterByFormula: "{res_id}='"+new_select_id+"'"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
-                setSelectedCome(record);
+                setSelectedReservation(record);
                 new_arr.includes(record.id) ? new_arr=new_arr.filter(item=>item !== record.id) : new_arr=[...new_arr,record.id];//若紀錄已被勾選刪除紀錄，否則紀錄勾選id
                 setUpdateId(new_arr);
             });
@@ -45,7 +46,6 @@ export default function Come(){
             if (err) { console.error(err); return; }
         });
     }
-    console.log(SelectedId_arr);
     return(
         <div>
             <div className="heads">
@@ -53,16 +53,18 @@ export default function Come(){
             </div>
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
                 <Grid item>
-                    {SelectedId_arr.length===1 && <Come_update update_id={SelectedId_arr[0]} come={SelectedCome}/>}
+                    {SelectedId_arr.length===1 && <ReservationUpdate update_id={SelectedId_arr[0]} reservation={SelectedReservation}/>}
                 </Grid>
                 <Grid item>
-                    {SelectedId_arr.length>0 && <Come_delete delete_id={SelectedId_arr}/>}
+                    {SelectedId_arr.length>0 && <ReservationDelete delete_id={SelectedId_arr}/>}
                 </Grid>
-                <Grid item><Come_create /></Grid>
+                <Grid item>
+                    <ReservationCreate />
+                </Grid>
             </Grid>
-            <div className="container">
+            <div className="contanier">
                 <TableContainer>
-                    <Table tablename='come' >
+                    <Table tablename="reservation">
                         <TableHead>
                             <TableRow>
                                 <TableCell padding="checkbox">
@@ -70,28 +72,26 @@ export default function Come(){
                                 </TableCell>
                                 <TableCell>編號</TableCell>
                                 <TableCell>顧客名稱</TableCell>
-                                <TableCell>來訪日期</TableCell>
-                                <TableCell>負責員工名稱</TableCell>
-                                <TableCell>得知管道</TableCell>
-                                <TableCell>有興趣產品</TableCell>
-                                <TableCell>停留時長</TableCell>
+                                <TableCell>顧客電話</TableCell>
+                                <TableCell>預約時間</TableCell>
+                                <TableCell>負責員工姓名</TableCell>
+                                <TableCell>後續狀態</TableCell>
                                 <TableCell>備註</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {come.map((come) =>(
-                                <TableRow key={come.fields.com_id}>
+                            {reservation.map((reservation)=>(
+                                <TableRow key={reservation.fields.res_id}>
                                     <TableCell padding="checkbox">
-                                        <Checkbox id={come.fields.com_id.toString()} onClick={handleSelect}/>
+                                        <Checkbox id={reservation.fields.res_id.toString()} onClick={handleSelect}/>
                                     </TableCell>
-                                    <TableCell>{come.fields.com_id}</TableCell>
-                                    <TableCell>{come.fields.com_cus_name}</TableCell>
-                                    <TableCell>{come.fields.com_date}</TableCell>
-                                    <TableCell>{come.fields.com_em_name}</TableCell>
-                                    <TableCell>{come.fields.com_know}</TableCell>
-                                    <TableCell>{come.fields.com_product_name}</TableCell>
-                                    <TableCell>{come.fields.com_time}</TableCell>
-                                    <TableCell>{come.fields.com_remark}</TableCell>
+                                    <TableCell>{reservation.fields.res_id}</TableCell>
+                                    <TableCell>{reservation.fields.res_cus_name}</TableCell>
+                                    <TableCell>{reservation.fields.res_cus_phone}</TableCell>
+                                    <TableCell>{moment(reservation.fields.res_date).format('YYYY-MM-DD HH:mm')}</TableCell>
+                                    <TableCell>{reservation.fields.res_em_name}</TableCell>
+                                    <TableCell>{reservation.fields.res_status}</TableCell>
+                                    <TableCell>{reservation.fields.res_remark}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -99,5 +99,6 @@ export default function Come(){
                 </TableContainer>
             </div>
         </div>
+
     )
 }

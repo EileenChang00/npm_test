@@ -1,9 +1,9 @@
 import { Table, TableCell, TableContainer, TableHead, TableRow, Checkbox, TableBody, Grid } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import "./come.css";
-import Buy_create from "./buy_create";
-import Buy_delete from "./buy_delete";
-import Buy_update from "./buy_update";
+import "../come.css";
+import BuyCreate from "./buy_create";
+import BuyDelete from "./buy_delete";
+import BuyUpdate from "./buy_update";
 
 export default function Buy(){
     //connect airtable
@@ -51,12 +51,12 @@ export default function Buy(){
             </div>
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
                 <Grid item>
-                    {SelectedId_arr.length===1 && <Buy_update update_id={SelectedId_arr[0]} buy={SelectedBuy}/>}
+                    {SelectedId_arr.length===1 && <BuyUpdate update_id={SelectedId_arr[0]} buy={SelectedBuy}/>}
                 </Grid>
                 <Grid item>
-                    {SelectedId_arr.length>0 && <Buy_delete delete_id={SelectedId_arr}/>}
+                    {SelectedId_arr.length>0 && <BuyDelete delete_id={SelectedId_arr}/>}
                 </Grid>
-                <Grid item><Buy_create /></Grid>
+                <Grid item><BuyCreate /></Grid>
             </Grid>
             <div className="container">
                 <TableContainer>

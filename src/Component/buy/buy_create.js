@@ -378,9 +378,9 @@ export default function Buy_create(){
     console.log(service);
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
+            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增購買</Button>
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>新增資料</DialogTitle>
+                <DialogTitle>新增購買資料</DialogTitle>
                 <DialogContent>
                     <Autocomplete  
                     value={value_cus}

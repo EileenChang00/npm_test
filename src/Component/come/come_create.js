@@ -2,13 +2,15 @@ import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuIte
 import { useState, useEffect } from 'react';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
-export default function Reservation_create(){
+
+export default function Come_create(){
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
     //import moment
     var moment = require('moment');
-    const currentDate = moment().format('YYYY-MM-DDTHH:mm');
+    const currentDate = moment().format('YYYY-MM-DD');
+    console.log(currentDate);
     //control Update-Dialog open
     const [open,setOpen] = useState(false);
     const handleOpen = () =>{
@@ -67,7 +69,9 @@ export default function Reservation_create(){
     });
     setValue_cus(dialogValue_cus.name);
     closeCustomerDialog();
-    }//員工名稱選單
+    }
+
+    //員工名稱選單
     const [SelectEmployee, setSelectEmployee] = useState([]);
     useEffect(()=>{
         base('employee').select({
@@ -84,12 +88,24 @@ export default function Reservation_create(){
             if (err) { console.error(err); return; }
         });
     },[])
-    //後續狀態選單
-    const StatusChoice = [
-        {id:"complete", name:"完成"},
-        {id:"Reschedule", name:"改期"},
-        {id:"cancel", name:"取消"},
-    ]
+    //產品名稱選單
+    const [SelectProduct, setSelectProduct] = useState([]);
+    useEffect(()=>{
+        base('product').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                SelectProduct.push({
+                    recordId:record.id,
+                    name:record.fields.product_name});
+                setSelectProduct(SelectProduct);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
+    console.log(SelectProduct);
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -104,18 +120,22 @@ export default function Reservation_create(){
 
     //get & prepare update data
     const [newCustomerId, setCustomerId] = useState('');
-    const [newPhone, setPhone] = useState('');
-    const ChangePhone = (event) =>{
-        setPhone(event.target.value);
+    const [newComeDate, setComeDate] = useState(currentDate);
+    const ChangeComeDate = (event) =>{
+        setComeDate(event.target.value);
     };
-    const [newDate, setDate] = useState(currentDate);
-    const ChangeDate = (event) =>{
-        setDate(event.target.value);
-    };
-    console.log(newDate);
     const [newEmployeeId, setEmployeeId] = useState('');
     const ChangeEmployeeId = (event) =>{
         setEmployeeId(event.target.value);
+    };
+    const [newKnow, setKnow] = useState('');
+    const ChangeKnow = (event) =>{
+        setKnow(event.target.value);
+    };
+    const [newProductId, setProductId] = useState([]);
+    const [newTime, setTime] = useState('');
+    const ChangeTime = (event) =>{
+        setTime(event.target.value);
     };
     const [newRemark, setRemark] = useState('');
     const ChangeRemark = (event) =>{
@@ -123,39 +143,40 @@ export default function Reservation_create(){
     };
     //when Create button is clicked
     function handleClick(){
-        base('reservation').create([
+        base('come').create([
         {
             "fields": {
-            "res_cus_id" : [newCustomerId],
-            "res_date": moment(newDate).format('YYYY-MM-DDTHH:mm:ssZ'),
-            "res_em_id": [newEmployeeId],
-            "res_remark" : newRemark,
+            "com_cus_id": [newCustomerId],
+            "com_date": newComeDate,
+            "com_em_id": [newEmployeeId],
+            "com_know": newKnow,
+            "com_time": newTime,
+            "com_remark": newRemark,
+            "com_product_id": newProductId
             }
-        }
+        },
         ], function(err, records) {
         if (err) {
             console.error(err);
             alert(err);
             return;
         }
-        records.forEach(function (record) {
-            console.log(record.getId());
-            alert("完成新增");
-        });
+        alert("完成新增");
         });
         handleClose();
     }
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
-            <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="xs">
-                <DialogTitle>新增資料</DialogTitle>
+            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增來訪</Button>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>新增來訪資料</DialogTitle>
                 <DialogContent>
                     <Autocomplete 
                     value={value_cus}
                     onChange={(event, newValue) => {
+                        console.log(newValue);
                         if(!newValue){
-                            console.log('!newValue');
+                            console.log('newValue');
                         }else if (newValue && newValue[0].search(newValue[1]) !== -1) {
                             // timeout to avoid instant validation of the dialog's form.
                             setTimeout(() => {
@@ -168,7 +189,6 @@ export default function Reservation_create(){
                         }else {
                             setValue_cus(newValue[0]);
                             setCustomerId(newValue[2]);
-                            setPhone(newValue[1]);
                         }
                         }}
                     filterOptions={(options, params) => {
@@ -229,15 +249,32 @@ export default function Reservation_create(){
                         </DialogActions>
                         </form>
                     </Dialog>
-                    <TextField margin="dense" label="手機" type="text" value={newPhone} onChange={ChangePhone} fullWidth />
-                    <InputLabel>預約日期</InputLabel>
-                    <TextField margin="dense" type="datetime-local" value={newDate} onChange={ChangeDate} fullWidth />
+                    <InputLabel>來訪日期</InputLabel>
+                    <TextField margin="dense" type="date" value={newComeDate} onChange={ChangeComeDate} fullWidth />
                     <InputLabel>負責員工名稱</InputLabel>
                     <Select label="負責員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
                         {SelectEmployee.map((nameList) =>(
                             <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
                     </Select>
+                    <TextField margin="dense" label="得知管道" type="text" value={newKnow} onChange={ChangeKnow} fullWidth />
+                    <Autocomplete
+                        freeSolo
+                        multiple
+                        onChange={(event,newValue)=>{
+                            if(!newValue){
+                                console.log("!newValue");
+                            }
+                            console.log(newValue);
+                            setProductId(newValue.map((product)=>product.recordId));
+                        }}
+                        options={SelectProduct}
+                        getOptionLabel={(option) => option.name}
+                        renderInput={(params) => (
+                        <TextField {...params} label="有興趣的產品" margin="normal" />
+                        )}
+                    />
+                    <TextField margin="dense" label="停留時長" type="text" value={newTime} onChange={ChangeTime} fullWidth />
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />
                 </DialogContent>
                 <DialogActions>
@@ -246,6 +283,5 @@ export default function Reservation_create(){
                 </DialogActions>
             </Dialog>
         </div>
-
     )
 }

@@ -1,9 +1,9 @@
-import { Button, Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
+import { Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody, Grid } from "@material-ui/core";
 import { useEffect, useState } from "react";
-import "./come.css";
-import Product_create from "./product_create";
-import Product_update from "./product_update";
-import Product_delete from "./product_delete";
+import "../come.css";
+import ProductCreate from "./product_create";
+import ProductUpdate from "./product_update";
+import ProductDelete from "./product_delete";
 
 export default function Product(){
     //connect airtable
@@ -26,6 +26,7 @@ export default function Product(){
 
     //將被勾選的資料id存進array
     const [SelectedId_arr, setUpdateId] = useState([]);
+    const [SelectedProduct, setSelectedProduct] = useState([]);
     const handleSelect = (event) =>{
         //從勾選id得知哪筆資料要進行修改//勾選id=com_id
         var new_select_id = event.target.getAttribute("id");
@@ -35,6 +36,7 @@ export default function Product(){
             filterByFormula: "{product_id}='"+new_select_id+"'"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
+                setSelectedProduct(record);
                 new_arr.includes(record.id) ? new_arr=new_arr.filter(item=>item !== record.id) : new_arr=[...new_arr,record.id];//若紀錄已被勾選，刪除紀錄，否則紀錄勾選id
                 setUpdateId(new_arr);
             });
@@ -49,11 +51,15 @@ export default function Product(){
             <div className="heads">
                 <h1>SCHRAMM</h1>
             </div>
-            <div align="right">
-                <Product_create />               
-                {SelectedId_arr.length===1 && <Product_update update_id={SelectedId_arr[0]} />}               
-                {SelectedId_arr.length>0 && <Product_delete delete_id={SelectedId_arr} />}
-            </div>
+            <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
+                <Grid item>
+                    {SelectedId_arr.length===1 && <ProductUpdate update_id={SelectedId_arr[0]}  product={SelectedProduct} />}
+                </Grid>
+                <Grid item>
+                    {SelectedId_arr.length>0 && <ProductDelete delete_id={SelectedId_arr} />}
+                </Grid>
+                <Grid item><ProductCreate /></Grid>
+            </Grid>
             <div className="container">
                 <TableContainer>
                     <Table tablename='product'>

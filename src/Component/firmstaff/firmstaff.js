@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Grid, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
-import "./come.css";
-import Reservation_create from "./reservation_create";
-import Reservation_update from "./reservation_update";
-import Reservation_delete from "./reservation_delete";
+import "../come.css";
+import FirmstaffCreate from "./firmstaff_create";
+import FirmstaffUpdate from "./firmstaff_update";
+import FirmstaffDelete from "./firmstaff_delete";
 
-export default function Reservation(){
+export default function Firmstaff(){
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
-    //import moment
-    var moment = require('moment');
-    //get 'reservation' records as reservation
-    const [reservation, setReservation] = useState([]);
+    //get 'firm' records as firm
+    const [firmstaff, setFirmstaff] = useState([]);
     useEffect(()=>{
-        base('reservation').select({
-            view: "Grid view"
+        base('firmstaff').select({
+            view: "Grid view2"
         }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
-            setReservation(records);
+            setFirmstaff(records);
         });
         fetchNextPage();
         }, function done(err) {
@@ -27,17 +25,17 @@ export default function Reservation(){
     },[]);
     //將被勾選的資料id存進array
     const [SelectedId_arr, setUpdateId] = useState([]);
-    const [SelectedReservation, setSelectedReservation] = useState([]);
+    const [SelectedFirmstaff, setSelectedFirmstaff] = useState([]);
     const handleSelect = (event) =>{
         //從勾選id得知哪筆資料要進行修改//勾選id=com_id
         var new_select_id = event.target.getAttribute("id");
         var new_arr = SelectedId_arr;
-        base('reservation').select({
-            view: "Grid view",
-            filterByFormula: "{res_id}='"+new_select_id+"'"
+        base('firmstaff').select({
+            view: "Grid view2",
+            filterByFormula: "{firmstaff_id}='"+new_select_id+"'"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
-                setSelectedReservation(record);
+                setSelectedFirmstaff(record);
                 new_arr.includes(record.id) ? new_arr=new_arr.filter(item=>item !== record.id) : new_arr=[...new_arr,record.id];//若紀錄已被勾選刪除紀錄，否則紀錄勾選id
                 setUpdateId(new_arr);
             });
@@ -53,45 +51,49 @@ export default function Reservation(){
             </div>
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
                 <Grid item>
-                    {SelectedId_arr.length===1 && <Reservation_update update_id={SelectedId_arr[0]} reservation={SelectedReservation}/>}
+                    {SelectedId_arr.length===1 && <FirmstaffUpdate update_id={SelectedId_arr[0]} firmstaff={SelectedFirmstaff}/>}
                 </Grid>
                 <Grid item>
-                    {SelectedId_arr.length>0 && <Reservation_delete delete_id={SelectedId_arr}/>}
+                    {SelectedId_arr.length>0 && <FirmstaffDelete delete_id={SelectedId_arr}/>}
                 </Grid>
                 <Grid item>
-                    <Reservation_create />
+                    <FirmstaffCreate />
                 </Grid>
             </Grid>
             <div className="contanier">
                 <TableContainer>
-                    <Table tablename="reservation">
+                    <Table tablename="firmstaff">
                         <TableHead>
                             <TableRow>
                                 <TableCell padding="checkbox">
                                     <Checkbox />
                                 </TableCell>
                                 <TableCell>編號</TableCell>
-                                <TableCell>顧客名稱</TableCell>
-                                <TableCell>顧客電話</TableCell>
-                                <TableCell>預約時間</TableCell>
-                                <TableCell>負責員工姓名</TableCell>
-                                <TableCell>後續狀態</TableCell>
+                                <TableCell>廠商人員名稱</TableCell>
+                                <TableCell>公司名稱</TableCell>
+                                <TableCell>手機</TableCell>
+                                <TableCell>傳真</TableCell>
+                                <TableCell>職稱</TableCell>
+                                <TableCell>電子信箱</TableCell>
+                                <TableCell>評價</TableCell>
                                 <TableCell>備註</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {reservation.map((reservation)=>(
-                                <TableRow key={reservation.fields.res_id}>
+                            {firmstaff.map((firmstaff)=>(
+                                <TableRow key={firmstaff.fields.firmstaff_id}>
                                     <TableCell padding="checkbox">
-                                        <Checkbox id={reservation.fields.res_id.toString()} onClick={handleSelect}/>
+                                        <Checkbox id={firmstaff.fields.firmstaff_id.toString()} onClick={handleSelect} />
                                     </TableCell>
-                                    <TableCell>{reservation.fields.res_id}</TableCell>
-                                    <TableCell>{reservation.fields.res_cus_name}</TableCell>
-                                    <TableCell>{reservation.fields.res_cus_phone}</TableCell>
-                                    <TableCell>{moment(reservation.fields.res_date).format('YYYY-MM-DD HH:mm')}</TableCell>
-                                    <TableCell>{reservation.fields.res_em_name}</TableCell>
-                                    <TableCell>{reservation.fields.res_status}</TableCell>
-                                    <TableCell>{reservation.fields.res_remark}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_id}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_name}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_firm_name}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_phone}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_fax}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_profession}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_mail}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_evaluation}</TableCell>
+                                    <TableCell>{firmstaff.fields.firmstaff_remark}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -99,6 +101,5 @@ export default function Reservation(){
                 </TableContainer>
             </div>
         </div>
-
     )
 }

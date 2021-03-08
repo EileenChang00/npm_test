@@ -1,43 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
-import "./come.css";
-import Service_create from "./service_create";
-import Service_update from "./service_update";
-import Service_delete from "./service_delete";
+import { Grid, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import "../come.css";
+import ComeUpdate from "./come_update"
+import ComeCreate from "./come_create"
+import ComeDelete from "./come_delete"
 
-export default function Service(){
+export default function Come(){
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
-    //import moment
-    var moment = require('moment');
-    //get 'service'records as service
-    const [service, setService] = useState([]);
+    //get 'come'records as come
+    const [come, setCome] = useState([]);
     useEffect(()=>{
-        base('service').select({
+        base('come').select({
             view: "Grid view"
         }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
-            setService(records);
+            setCome(records);
         });
         fetchNextPage();
         }, function done(err) {
             if (err) { console.error(err); return; }
         });
     },[])
+
     //將被勾選的資料id存進array
     const [SelectedId_arr, setUpdateId] = useState([]);
-    const [SelectedService, setSelectedService] = useState([]);
+    const [SelectedCome, setSelectedCome] = useState([]);
     const handleSelect = (event) =>{
         //從勾選id得知哪筆資料要進行修改//勾選id=com_id
         var new_select_id = event.target.getAttribute("id");
         var new_arr = SelectedId_arr;
-        base('service').select({
+        base('come').select({
             view: "Grid view",
-            filterByFormula: "{ser_id}='"+new_select_id+"'"
+            filterByFormula: "{com_id}='"+new_select_id+"'"
         }).eachPage(function page(records, fetchNextPage) {
             records.forEach(function(record) {
-                setSelectedService(record);
+                setSelectedCome(record);
                 new_arr.includes(record.id) ? new_arr=new_arr.filter(item=>item !== record.id) : new_arr=[...new_arr,record.id];//若紀錄已被勾選刪除紀錄，否則紀錄勾選id
                 setUpdateId(new_arr);
             });
@@ -54,18 +53,16 @@ export default function Service(){
             </div>
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
                 <Grid item>
-                    {SelectedId_arr.length===1 && <Service_update update_id={SelectedId_arr[0]} service={SelectedService}/>}
+                    {SelectedId_arr.length===1 && <ComeUpdate update_id={SelectedId_arr[0]} come={SelectedCome}/>}
                 </Grid>
                 <Grid item>
-                    {SelectedId_arr.length>0 && <Service_delete delete_id={SelectedId_arr}/>}
+                    {SelectedId_arr.length>0 && <ComeDelete delete_id={SelectedId_arr}/>}
                 </Grid>
-                <Grid item>
-                    <Service_create />
-                </Grid>
+                <Grid item><ComeCreate /></Grid>
             </Grid>
             <div className="container">
                 <TableContainer>
-                    <Table tablename="service">
+                    <Table tablename='come' >
                         <TableHead>
                             <TableRow>
                                 <TableCell padding="checkbox">
@@ -73,26 +70,28 @@ export default function Service(){
                                 </TableCell>
                                 <TableCell>編號</TableCell>
                                 <TableCell>顧客名稱</TableCell>
-                                <TableCell>產品名稱</TableCell>
-                                <TableCell>服務日期</TableCell>
-                                <TableCell>服務項目</TableCell>
-                                <TableCell>負責員工姓名</TableCell>
+                                <TableCell>來訪日期</TableCell>
+                                <TableCell>負責員工名稱</TableCell>
+                                <TableCell>得知管道</TableCell>
+                                <TableCell>有興趣產品</TableCell>
+                                <TableCell>停留時長</TableCell>
                                 <TableCell>備註</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {service.map((service)=>(
-                                <TableRow key={service.fields.ser_id}>
+                            {come.map((come) =>(
+                                <TableRow key={come.fields.com_id}>
                                     <TableCell padding="checkbox">
-                                        <Checkbox id={service.fields.ser_id.toString()} onClick={handleSelect}/>
+                                        <Checkbox id={come.fields.com_id.toString()} onClick={handleSelect}/>
                                     </TableCell>
-                                    <TableCell>{service.fields.ser_id}</TableCell>
-                                    <TableCell>{service.fields.ser_cus_name}</TableCell>
-                                    <TableCell>{service.fields.ser_productname}</TableCell>
-                                    <TableCell>{moment(service.fields.ser_actualdate).format('YYYY-MM-DD HH:mm')}</TableCell>
-                                    <TableCell>{service.fields.ser_project}</TableCell>
-                                    <TableCell>{service.fields.ser_em_name}</TableCell>
-                                    <TableCell>{service.fields.ser_remark}</TableCell>
+                                    <TableCell>{come.fields.com_id}</TableCell>
+                                    <TableCell>{come.fields.com_cus_name}</TableCell>
+                                    <TableCell>{come.fields.com_date}</TableCell>
+                                    <TableCell>{come.fields.com_em_name}</TableCell>
+                                    <TableCell>{come.fields.com_know}</TableCell>
+                                    <TableCell>{come.fields.com_product_name}</TableCell>
+                                    <TableCell>{come.fields.com_time}</TableCell>
+                                    <TableCell>{come.fields.com_remark}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

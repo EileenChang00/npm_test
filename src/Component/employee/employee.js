@@ -1,9 +1,9 @@
 import { Grid, Table, TableCell, TableRow, TableContainer, TableHead, Checkbox, TableBody } from "@material-ui/core";
 import { useEffect, useState } from "react";
-import "./come.css";
-import Employee_create from "./employee_create";
-import Employee_update from "./employee_update";
-import Employee_delete from "./employee_delete";
+import "../come.css";
+import EmployeeCreate from "./employee_create";
+import EmployeeUpdate from "./employee_update";
+import EmployeeDelete from "./employee_delete";
 
 export default function Employee(){
     //connect airtable
@@ -53,9 +53,9 @@ export default function Employee(){
             </div>
             
             <Grid container direction="row" justify="flex-end" alignItems="center" spacing={3}>
-                <Grid item>{SelectedId_arr.length===1 && <Employee_update update_id={SelectedId_arr[0]}  employee={SelectedEmployee}/>}</Grid>
-                <Grid item>{SelectedId_arr.length>0 && <Employee_delete delete_id={SelectedId_arr} />}</Grid>
-                <Grid item><Employee_create /></Grid>
+                <Grid item>{SelectedId_arr.length===1 && <EmployeeUpdate update_id={SelectedId_arr[0]}  employee={SelectedEmployee}/>}</Grid>
+                <Grid item>{SelectedId_arr.length>0 && <EmployeeDelete delete_id={SelectedId_arr} />}</Grid>
+                <Grid item><EmployeeCreate /></Grid>
             </Grid>
             <div className="container">
                 <TableContainer>

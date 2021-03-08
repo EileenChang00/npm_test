@@ -2,14 +2,13 @@ import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuIte
 import { useState, useEffect } from 'react';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
-export default function Service_create(){
+export default function Reservation_create(){
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
     //import moment
     var moment = require('moment');
     const currentDate = moment().format('YYYY-MM-DDTHH:mm');
-    console.log(currentDate);
     //control Update-Dialog open
     const [open,setOpen] = useState(false);
     const handleOpen = () =>{
@@ -23,7 +22,7 @@ export default function Service_create(){
     const [SelectCustomer, setSelectCustomer] = useState([]);
     useEffect(()=>{
         base('customer').select({
-        view: "Grid view2"
+        view: "Grid view"
     }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
             SelectCustomer.push([record.fields.cus_name,record.fields.cus_phone,record.id]);
@@ -68,32 +67,7 @@ export default function Service_create(){
     });
     setValue_cus(dialogValue_cus.name);
     closeCustomerDialog();
-    }
-    //產品名稱選單
-    const [SelectProduct, setSelectProduct] = useState([]);
-    useEffect(()=>{
-        base('product').select({
-            view: "Grid view"
-        }).eachPage(function page(records, fetchNextPage) {
-            records.forEach(function(record) {
-                SelectProduct.push({
-                    recordId:record.id,
-                    name:record.fields.product_name});
-                setSelectProduct(SelectProduct);
-            });
-            fetchNextPage();
-        }, function done(err) {
-            if (err) { console.error(err); return; }
-        });
-    },[])
-    //服務項目選單
-    const ProjectChoice = [
-        {id:"card", name:"寄送小卡"},
-        {id:"bed", name:"翻床墊"},
-        {id:"battery", name:"換電池"},
-        {id:"pillow", name:"換枕頭"},
-    ]
-    //員工名稱選單
+    }//員工名稱選單
     const [SelectEmployee, setSelectEmployee] = useState([]);
     useEffect(()=>{
         base('employee').select({
@@ -110,6 +84,12 @@ export default function Service_create(){
             if (err) { console.error(err); return; }
         });
     },[])
+    //後續狀態選單
+    const StatusChoice = [
+        {id:"complete", name:"完成"},
+        {id:"Reschedule", name:"改期"},
+        {id:"cancel", name:"取消"},
+    ]
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -124,15 +104,15 @@ export default function Service_create(){
 
     //get & prepare update data
     const [newCustomerId, setCustomerId] = useState('');
-    const [newProductName, setProductName] = useState('');
-    const [newServiceDate, setServiceDate] = useState(currentDate);
-    const ChangeServiceDate = (event) =>{
-        setServiceDate(event.target.value);
+    const [newPhone, setPhone] = useState('');
+    const ChangePhone = (event) =>{
+        setPhone(event.target.value);
     };
-    const [newProject, setProject] = useState('');
-    const ChangeProject = (event) =>{
-        setProject(event.target.value);
+    const [newDate, setDate] = useState(currentDate);
+    const ChangeDate = (event) =>{
+        setDate(event.target.value);
     };
+    console.log(newDate);
     const [newEmployeeId, setEmployeeId] = useState('');
     const ChangeEmployeeId = (event) =>{
         setEmployeeId(event.target.value);
@@ -143,15 +123,13 @@ export default function Service_create(){
     };
     //when Create button is clicked
     function handleClick(){
-        base('service').create([
+        base('reservation').create([
         {
             "fields": {
-            "ser_cus_id" : [newCustomerId],
-            "ser_productname" : newProductName,
-            "ser_actualdate": newServiceDate,
-            "ser_project": newProject,
-            "ser_em_id": [newEmployeeId],
-            "ser_remark" : newRemark,
+            "res_cus_id" : [newCustomerId],
+            "res_date": moment(newDate).format('YYYY-MM-DDTHH:mm:ssZ'),
+            "res_em_id": [newEmployeeId],
+            "res_remark" : newRemark,
             }
         }
         ], function(err, records) {
@@ -169,7 +147,7 @@ export default function Service_create(){
     }
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
+            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增預約</Button>
             <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="xs">
                 <DialogTitle>新增資料</DialogTitle>
                 <DialogContent>
@@ -177,7 +155,7 @@ export default function Service_create(){
                     value={value_cus}
                     onChange={(event, newValue) => {
                         if(!newValue){
-                            console.log('newValue');
+                            console.log('!newValue');
                         }else if (newValue && newValue[0].search(newValue[1]) !== -1) {
                             // timeout to avoid instant validation of the dialog's form.
                             setTimeout(() => {
@@ -190,6 +168,7 @@ export default function Service_create(){
                         }else {
                             setValue_cus(newValue[0]);
                             setCustomerId(newValue[2]);
+                            setPhone(newValue[1]);
                         }
                         }}
                     filterOptions={(options, params) => {
@@ -250,28 +229,9 @@ export default function Service_create(){
                         </DialogActions>
                         </form>
                     </Dialog>
-                    <Autocomplete
-                    freeSolo
-                    onChange={(event,newValue)=>{
-                        if(!newValue){
-                            console.log("!newValue");
-                        }
-                        setProductName(newValue.name);
-                    }}
-                    options={SelectProduct}
-                    getOptionLabel={(option) => option.name}
-                    renderInput={(params) => (
-                    <TextField {...params} label="產品名稱" margin="normal" />
-                    )}
-                    />
-                    <InputLabel>來訪日期</InputLabel>
-                    <TextField margin="dense" type="datetime-local" value={newServiceDate} onChange={ChangeServiceDate} fullWidth />
-                    <InputLabel>服務項目</InputLabel>
-                    <Select label="服務項目" fullWidth value={newProject} onChange={ChangeProject} MenuProps={MenuProps}>
-                        {ProjectChoice.map((list) =>(
-                            <MenuItem key={list.id} value={list.name}>{list.name}</MenuItem>
-                        ))}
-                    </Select>
+                    <TextField margin="dense" label="手機" type="text" value={newPhone} onChange={ChangePhone} fullWidth />
+                    <InputLabel>預約日期</InputLabel>
+                    <TextField margin="dense" type="datetime-local" value={newDate} onChange={ChangeDate} fullWidth />
                     <InputLabel>負責員工名稱</InputLabel>
                     <Select label="負責員工名稱" fullWidth value={newEmployeeId} onChange={ChangeEmployeeId} MenuProps={MenuProps}>
                         {SelectEmployee.map((nameList) =>(
@@ -286,5 +246,6 @@ export default function Service_create(){
                 </DialogActions>
             </Dialog>
         </div>
+
     )
 }

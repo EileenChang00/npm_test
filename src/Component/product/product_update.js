@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 
 export default function Product_update(props){
     console.log(props.update_id);
+    const product = props.product;
     //connect airtable
     var Airtable = require('airtable');
     var base = new Airtable({apiKey: 'keyUAL9XklAOyi08b'}).base('apphBomMb49ieU17N');
@@ -45,35 +46,35 @@ export default function Product_update(props){
     };
 
     //get & prepare update data
-    const [newProductName, setProductName] = useState('');
+    const [newProductName, setProductName] = useState(product.fields.product_name);
     const ChangeProductName = (event) =>{
         setProductName(event.target.value);
     }
-    const [newCategory, setCategory] = useState('');
+    const [newCategory, setCategory] = useState(product.fields.product_category);
     const ChangeCategory = (event) =>{
         setCategory(event.target.value);
     }
-    const [newSeries, setSeries] = useState('');
+    const [newSeries, setSeries] = useState(product.fields.product_series);
     const ChangeSeries = (event) =>{
         setSeries(event.target.value);
     }
-    const [newFixedSize, setFixedSize] = useState('');
+    const [newFixedSize, setFixedSize] = useState(product.fields.product_fixedsize);
     const ChangeFixedSize = (event) =>{
         setFixedSize(event.target.value);
     }
-    const [newSize, setSize] = useState('');
+    const [newSize, setSize] = useState(product.fields.product_size);
     const ChangeSize = (event) =>{
         setSize(event.target.value);
     }
-    const [newPrice, setPrice] = useState('');
+    const [newPrice, setPrice] = useState(product.fields.product_price);
     const ChangePrice = (event) =>{
         setPrice(event.target.value);
     }
-    const [newProducerId, setProducerId] = useState('');
+    const [newProducerId, setProducerId] = useState(product.fields.product_producer_id);
     const ChangeProducerId = (event) =>{
         setProducerId(event.target.value);
     }
-    const [newNote, setNote] = useState('');
+    const [newNote, setNote] = useState(product.fields.product_note);
     const ChangeNote = (event) =>{
         setNote(event.target.value);
     }
