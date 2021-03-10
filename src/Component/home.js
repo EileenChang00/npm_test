@@ -1,6 +1,5 @@
 
 import './App.css';
-import './css/bootstrap.css';
 import Background from './bg.jpeg';
 import {
     //BrowserRouter as Router,
@@ -20,6 +19,7 @@ import Reservation from "./reservation/reservation";
 import Firm from "./firm/firm";
 import Firmstaff from "./firmstaff/firmstaff";
 import Visit from "./visit/visit";
+import ReservationCreate from "./reservation/reservation_create";
 
 var backgroundstyle = {
     width: "auto",
@@ -27,7 +27,7 @@ var backgroundstyle = {
     backgroundImage: `url(${Background})`
 };
 
-function home() {
+function home(){
     //setInterval(tick, 1000);
     return (
         <div style={backgroundstyle}>
@@ -71,7 +71,7 @@ function home() {
                                     <Link to="/home"><a class="nav-link" href="/#">公告</a></Link>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/#">預約</a>
+                                    <ReservationCreate></ReservationCreate>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/#">來訪</a>
@@ -107,15 +107,6 @@ function home() {
             </div>
         </div>
     );
-
-    // function tick() {
-    //     const element = (
-    //       <div>
-    //         <h3>{new Date().toLocaleTimeString()}</h3>
-    //       </div>
-    //     );
-    //     ReactDOM.render(element, document.getElementById('time'));
-    //   }
 }
 
 

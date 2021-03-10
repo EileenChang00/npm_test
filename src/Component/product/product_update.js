@@ -33,6 +33,51 @@ export default function Product_update(props){
         });
     },[])
     console.log(SelectProducer);
+    //產品類別選單
+    const [productmenu, setProductmenu] = useState([]);
+    useEffect(()=>{
+        base('productmenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                productmenu.push(record.fields.menu);
+                setProductmenu(productmenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
+    //產品系列選單
+    const [serisemenu, setSerisemenu] = useState([]);
+    useEffect(()=>{
+        base('serisemenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                serisemenu.push(record.fields.menu);
+                setSerisemenu(serisemenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
+    //產品尺寸選單
+    const [sizemenu, setSizemenu] = useState([]);
+    useEffect(()=>{
+        base('sizemenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                sizemenu.push(record.fields.menu);
+                setSizemenu(sizemenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -110,9 +155,24 @@ export default function Product_update(props){
                 <DialogTitle>修改資料</DialogTitle>
                 <DialogContent>
                     <TextField margin="dense" label="產品名稱" type="text" value={newProductName} onChange={ChangeProductName} fullWidth />
-                    <TextField margin="dense" label="類別" type="text" value={newCategory} onChange={ChangeCategory} fullWidth />
-                     <TextField margin="dense" label="系列" type="text" value={newSeries} onChange={ChangeSeries} fullWidth />
-                    <TextField margin="dense" label="尺寸" type="text" value={newFixedSize} onChange={ChangeFixedSize} fullWidth />
+                    <InputLabel>類別</InputLabel>
+                    <Select label="類別" fullWidth value={newCategory} onChange={ChangeCategory} MenuProps={MenuProps}>
+                        {productmenu.map((productmenu) =>(
+                            <MenuItem key={productmenu} value={productmenu}>{productmenu}</MenuItem>
+                        ))}
+                    </Select>
+                    <InputLabel>系列</InputLabel>
+                    <Select label="系列" fullWidth value={newSeries} onChange={ChangeSeries} MenuProps={MenuProps}>
+                        {serisemenu.map((serisemenu) =>(
+                            <MenuItem key={serisemenu} value={serisemenu}>{serisemenu}</MenuItem>
+                        ))}
+                    </Select>
+                    <InputLabel>尺寸</InputLabel>
+                    <Select label="尺寸" fullWidth value={newFixedSize} onChange={ChangeFixedSize} MenuProps={MenuProps}>
+                        {sizemenu.map((sizemenu) =>(
+                            <MenuItem key={sizemenu} value={sizemenu}>{sizemenu}</MenuItem>
+                        ))}
+                    </Select>
                     <TextField margin="dense" label="特殊尺寸" type="text" value={newSize} onChange={ChangeSize} fullWidth />
                     <TextField margin="dense" label="價格" type="text" value={newPrice} onChange={ChangePrice} fullWidth />
                     <InputLabel>製造商名稱</InputLabel>

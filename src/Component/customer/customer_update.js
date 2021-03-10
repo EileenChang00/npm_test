@@ -1,6 +1,5 @@
-import Airtable from 'airtable';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, InputLabel } from "@material-ui/core";
-import { useState } from 'react';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, InputLabel, Select, MenuItem } from "@material-ui/core";
+import { useState, useEffect } from 'react';
 
 
 
@@ -64,7 +63,22 @@ export default function Customer_update(props){
     const ChangeInvoice = (event) =>{
         setInvoice(event.target.value);
     }
-    //multiple choices 
+    //multiple choices
+    //職業選單
+    const [promenu, setPromenu] = useState([]);
+    useEffect(()=>{
+        base('promenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                promenu.push(record.fields.menu);
+                setPromenu(promenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[]) 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
     const MenuProps = {
@@ -113,7 +127,12 @@ export default function Customer_update(props){
                     <TextField margin="dense" label="手機" type="text" value={newPhone} onChange={ChangePhone} fullWidth />
                     <InputLabel>生日</InputLabel>
                     <TextField margin="dense" type="date" value={newBirth} onChange={ChangeBirth} fullWidth />
-                     <TextField margin="dense" label="職業" type="text" value={newProfession} onChange={ChangeProfession} fullWidth />
+                    <InputLabel>職業</InputLabel>
+                    <Select label="職業" fullWidth value={newProfession} onChange={ChangeProfession} MenuProps={MenuProps}>
+                        {promenu.map((promenu) =>(
+                            <MenuItem key={promenu} value={promenu}>{promenu}</MenuItem>
+                        ))}
+                    </Select>
                     <TextField margin="dense" label="職稱" type="text" value={newTitle} onChange={ChangeTitle} fullWidth />
                     <TextField margin="dense" label="信箱" type="text" value={newEmail} onChange={ChangeEmail} fullWidth />
                     <TextField margin="dense" label="地址" type="text" value={newAddress} onChange={ChangeAddress} fullWidth />

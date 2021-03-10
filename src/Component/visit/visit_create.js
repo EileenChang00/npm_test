@@ -1,6 +1,5 @@
 import { Button, Dialog, DialogContent, DialogTitle, InputLabel, Select, MenuItem, TextField, DialogActions } from "@material-ui/core";
 import { useState, useEffect } from 'react';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 
 export default function Visit_create(){
     //connect Airtable
@@ -36,9 +35,6 @@ export default function Visit_create(){
            if (err) { console.error(err); return; }
        });
    },[])
-
-
-
     //員工選單
     const [SelectEmployee, setSelectEmployee] = useState([]);
     useEffect(()=>{
@@ -56,7 +52,21 @@ export default function Visit_create(){
             if (err) { console.error(err); return; }
         });
      },[])
-
+     //拜訪方式選單
+    const [visitmenu, setVisitmenu] = useState([]);
+    useEffect(()=>{
+        base('visitmenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                visitmenu.push(record.fields.menu);
+                setVisitmenu(visitmenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
        
      //選單樣式
      const ITEM_HEIGHT = 48;
@@ -147,8 +157,13 @@ export default function Visit_create(){
                         {SelectEmployee.map((nameList) =>(
                             <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
-                    </Select>  
-                    <TextField margin="dense" label="方式" type="text" value={newPurpose} onChange={ChangePurpose} fullWidth />
+                    </Select>
+                    <InputLabel>方式</InputLabel>
+                    <Select label="方式" fullWidth value={newPurpose} onChange={ChangePurpose} MenuProps={MenuProps}>
+                        {visitmenu.map((visitmenu) =>(
+                            <MenuItem key={visitmenu} value={visitmenu}>{visitmenu}</MenuItem>
+                        ))}
+                    </Select>
                     <TextField margin="dense" label="目的" type="text" value={newMethod} onChange={ChangeMethod} fullWidth />
                     <TextField margin="dense" label="拜訪時長(分鐘)" type="text" value={newDuration} onChange={ChangeDuration} fullWidth />
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />

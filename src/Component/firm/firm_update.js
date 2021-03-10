@@ -15,11 +15,21 @@ export default function Firm_update(props){
         setOpen(false);
     }
     //multiple choice
-    //後續狀態選單
-    const CategoryChoice = [
-        {id:"Design", name:"設計"},
-        {id:"construction", name:"建商"},
-    ]
+    //廠商類別選單
+    const [firmmenu, setFirmmenu] = useState([]);
+    useEffect(()=>{
+        base('firmmenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                firmmenu.push(record.fields.menu);
+                setFirmmenu(firmmenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -105,8 +115,8 @@ export default function Firm_update(props){
                     <TextField margin="dense" label="廠商公司名稱" type="text" value={newName} onChange={ChangeName} fullWidth />
                     <InputLabel>公司類別</InputLabel>
                     <Select label="公司類別" fullWidth value={newCategory} onChange={ChangeCategory} MenuProps={MenuProps}>
-                        {CategoryChoice.map((nameList) =>(
-                            <MenuItem key={nameList.id} value={nameList.name}>{nameList.name}</MenuItem>
+                        {firmmenu.map((firmmenu) =>(
+                            <MenuItem key={firmmenu} value={firmmenu}>{firmmenu}</MenuItem>
                         ))}
                     </Select>
                     <TextField margin="dense" label="公司電話" type="text" value={newPhone} onChange={ChangePhone} fullWidth />

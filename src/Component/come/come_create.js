@@ -106,6 +106,21 @@ export default function Come_create(){
         });
     },[])
     console.log(SelectProduct);
+    //得知管道選單
+    const [infomenu, setInfomenu] = useState([]);
+    useEffect(()=>{
+        base('infomenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                infomenu.push(record.fields.menu);
+                setInfomenu(infomenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -257,7 +272,12 @@ export default function Come_create(){
                             <MenuItem key={nameList.recordId} value={nameList.recordId}>{nameList.name}</MenuItem>
                         ))}
                     </Select>
-                    <TextField margin="dense" label="得知管道" type="text" value={newKnow} onChange={ChangeKnow} fullWidth />
+                    <InputLabel>得知管道</InputLabel>
+                    <Select label="得知管道" fullWidth value={newKnow} onChange={ChangeKnow} MenuProps={MenuProps}>
+                        {infomenu.map((infomenu) =>(
+                            <MenuItem key={infomenu} value={infomenu}>{infomenu}</MenuItem>
+                        ))}
+                    </Select>
                     <Autocomplete
                         freeSolo
                         multiple

@@ -110,6 +110,21 @@ export default function Service_create(){
             if (err) { console.error(err); return; }
         });
     },[])
+    //服務項目選單
+    const [servicemenu, setServicemenu] = useState([]);
+    useEffect(()=>{
+        base('servicemenu').select({
+            view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+            records.forEach(function(record) {
+                servicemenu.push(record.fields.menu);
+                setServicemenu(servicemenu);
+            });
+            fetchNextPage();
+        }, function done(err) {
+            if (err) { console.error(err); return; }
+        });
+    },[])
     //選單樣式
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -268,8 +283,8 @@ export default function Service_create(){
                     <TextField margin="dense" type="datetime-local" value={newServiceDate} onChange={ChangeServiceDate} fullWidth />
                     <InputLabel>服務項目</InputLabel>
                     <Select label="服務項目" fullWidth value={newProject} onChange={ChangeProject} MenuProps={MenuProps}>
-                        {ProjectChoice.map((list) =>(
-                            <MenuItem key={list.id} value={list.name}>{list.name}</MenuItem>
+                        {servicemenu.map((servicemenu) =>(
+                            <MenuItem key={servicemenu} value={servicemenu}>{servicemenu}</MenuItem>
                         ))}
                     </Select>
                     <InputLabel>負責員工名稱</InputLabel>
