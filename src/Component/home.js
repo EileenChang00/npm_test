@@ -19,7 +19,11 @@ import Reservation from "./reservation/reservation";
 import Firm from "./firm/firm";
 import Firmstaff from "./firmstaff/firmstaff";
 import Visit from "./visit/visit";
-import ReservationCreate from "./reservation/reservation_create";
+import ReservationCreate4home from "./reservation/reservation_create4home";
+import ComeCreate4home from "./come/come_create4home";
+import VisitCreate4home from "./visit/visit_create4home";
+import BuyCreate4home from "./buy/buy_create4home";
+import ServiceCreate4home from "./service/service_create4home";
 
 var backgroundstyle = {
     width: "auto",
@@ -42,13 +46,13 @@ function home(){
                         <Link to="/home/producer"><a href="/#" class="list-group-item list-group-item-action bg-light">後勤廠商資料表</a></Link>
                         <Link to="/home/firm"><a href="/#" class="list-group-item list-group-item-action bg-light">廠商資料表</a></Link>
                         <Link to="/home/firmstaff"><a href="/#" class="list-group-item list-group-item-action bg-light">廠商人員資料表</a></Link>
+                        <a href="/#" class="list-group-item list-group-item-action bg-light">贈品資料表</a>
                         <div>進階資料表</div>
                         <Link to="/home/reservation"><a href="/#" class="list-group-item list-group-item-action bg-light">預約資料表</a></Link>
                         <Link to="/home/come"><a href="/#" class="list-group-item list-group-item-action bg-light">來訪資料表</a></Link>
                         <Link to="/home/buy"><a href="/#" class="list-group-item list-group-item-action bg-light">購買資料表</a></Link>
                         <Link to="/home/service"><a href="/#" class="list-group-item list-group-item-action bg-light">售後服務資料表</a></Link>
                         <Link to="/home/visit"><a href="/#" class="list-group-item list-group-item-action bg-light">拜訪資料表</a></Link>
-                        <a href="/#" class="list-group-item list-group-item-action bg-light">贈品資料表</a>
                         <div>報表</div>
                         <a href="/#" class="list-group-item list-group-item-action bg-light">營業報表</a>
                         <a href="/#" class="list-group-item list-group-item-action bg-light">熱銷報表</a>
@@ -71,13 +75,19 @@ function home(){
                                     <Link to="/home"><a class="nav-link" href="/#">公告</a></Link>
                                 </li>
                                 <li class="nav-item">
-                                    <ReservationCreate></ReservationCreate>
+                                    <ReservationCreate4home></ReservationCreate4home>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/#">來訪</a>
+                                    <ComeCreate4home></ComeCreate4home>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/#">購買</a>
+                                    <BuyCreate4home></BuyCreate4home>
+                                </li>
+                                <li class="nav-item">
+                                    <ServiceCreate4home></ServiceCreate4home>
+                                </li>
+                                <li class="nav-item">
+                                    <VisitCreate4home></VisitCreate4home>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="/#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">設定</a>

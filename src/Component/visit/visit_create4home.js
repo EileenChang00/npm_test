@@ -151,7 +151,7 @@ export default function Visit_create(){
     }
     return(
         <div>
-            <Button width="25px" variant="contained" color="primary" onClick={handleOpen}>新增</Button>
+            <a class="nav-link" onClick={handleOpen}>拜訪</a>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>新增資料</DialogTitle>
                 <DialogContent>
@@ -183,7 +183,6 @@ export default function Visit_create(){
                     </Select>
                     <TextField margin="dense" label="拜訪時長(分鐘)" type="text" value={newDuration} onChange={ChangeDuration} fullWidth />
                     <TextField margin="dense" label="備註" type="text" value={newRemark} onChange={ChangeRemark} fullWidth />
-
                     </DialogContent>
                     <DialogActions>
                     <Button onClick={handleClose}>取消</Button>
