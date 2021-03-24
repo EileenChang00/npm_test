@@ -24,7 +24,8 @@ import ComeCreate4home from "./come/come_create4home";
 import VisitCreate4home from "./visit/visit_create4home";
 import BuyCreate4home from "./buy/buy_create4home";
 import ServiceCreate4home from "./service/service_create4home";
-
+import YearOnYear from "./YearOnYear";
+import Chart from "./Chart";
 var backgroundstyle = {
     width: "auto",
     height: "auto",
@@ -54,8 +55,8 @@ function home(){
                         <Link to="/home/service"><a href="/#" class="list-group-item list-group-item-action bg-light">售後服務資料表</a></Link>
                         <Link to="/home/visit"><a href="/#" class="list-group-item list-group-item-action bg-light">拜訪資料表</a></Link>
                         <div>報表</div>
-                        <a href="/#" class="list-group-item list-group-item-action bg-light">營業報表</a>
-                        <a href="/#" class="list-group-item list-group-item-action bg-light">熱銷報表</a>
+                        <Link to='/home/Chart'><a href="/#" class="list-group-item list-group-item-action bg-light">營業報表</a></Link>
+                        <Link to='/home/YearOnYear'><a href="/#" class="list-group-item list-group-item-action bg-light">環比報表</a></Link>
                         <a href="/#" class="list-group-item list-group-item-action bg-light">介紹次數報表</a>
                     </div>
                 </div>
@@ -112,6 +113,8 @@ function home(){
                 <Route path="/home/reservation" component={Reservation} />
                 <Route path="/home/firm" component={Firm} />
                 <Route path="/home/firmstaff" component={Firmstaff} />
+                <Route path="/home/YearOnYear" component={YearOnYear} />
+                <Route path="/home/Chart" component={Chart} />
                 </div>
 
             </div>

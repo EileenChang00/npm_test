@@ -342,6 +342,7 @@ export default function Buy_create(){
             });
         }
     };
+    //若購買或贈品有床墊產品，自動新增至售後服務
     const [service, setService] = useState([]);
     async function create_service(buy){
         var values_service = [value_sale.map((item)=>item),value_gift.map((item)=>item)];
@@ -357,7 +358,6 @@ export default function Buy_create(){
             }
             console.log("done");
         });
-        console.log("finish await");
         var service_records = service.map((item)=>{return {fields: {
             ser_productname : item.ser_productname,
             ser_buy_id: item.ser_buy_id,
