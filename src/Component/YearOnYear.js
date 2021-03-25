@@ -1,5 +1,6 @@
 import React from "react";
 import c3 from "c3";
+import "./Chart.css";
 
 export default function YearonYear() {
   //connect airtable

@@ -2,6 +2,7 @@ import React from "react";
 import c3 from "c3";
 import Datetime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
+import "./Chart.css";
 
 export default function Chart() {
   var Airtable = require('airtable');
@@ -64,6 +65,7 @@ export default function Chart() {
           label:{
             text:'月份',
             position: "outer-middle",
+            stroke:'#FF5809'
           }
         },
         y:{
